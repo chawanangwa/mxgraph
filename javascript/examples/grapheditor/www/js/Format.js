@@ -619,27 +619,6 @@ Format.prototype.refresh = function()
 		architecturePanel.appendChild(architectureBasePanel);
 		architectureBasePanel.appendChild(uncertaintyPanel);
 
-
-/*
-		var uncertaintySections = ["Uncertainty","Risk", "Mitigation", "Outcome"];
-
-		var id = 100;
-
-		uncertaintySections.forEach(element => {
-
-			var e = document.createElement('div');
-			e.className = 'geFormatSection';
-
-			e.id = id++;
-
-			e.appendChild(BaseFormatPanel.prototype.createTitle.call(this, element));
-			architecturePanel.appendChild(e);
-
-			mxUtils.br(architecturePanel,3);
-		});
-
-*/
-
 		this.panels.push(new ArchitectureFormatPanel(this, ui, architecturePanel));
 		this.container.appendChild(architecturePanel);
 		addClickHandler(label4, architecturePanel, idx++);
