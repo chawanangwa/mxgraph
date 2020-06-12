@@ -365,6 +365,8 @@ Format.prototype.refresh = function()
 	label.style.height = (mxClient.IS_QUIRKS) ? '34px' : '25px';
 	label.style.overflow = 'hidden';
 	label.style.width = '100%';
+
+	var divArch = div.cloneNode(false);
 	this.container.appendChild(div);
 	
 	// Prevents text selection
@@ -384,6 +386,7 @@ Format.prototype.refresh = function()
 		// and the menu item in the format menu
 		if (this.showCloseButton)
 		{
+			
 			var img = document.createElement('img');
 			img.setAttribute('border', '0');
 			img.setAttribute('src', Dialog.prototype.closeImage);
@@ -400,9 +403,23 @@ Format.prototype.refresh = function()
 			img.style.opacity = 0.5;
 			label.appendChild(img)
 			
+
+			var architectureButton = document.createElement('button');
+			architectureButton.innerHTML = "Architecture";
+			architectureButton.style.float = "left";
+			architectureButton.style.marginLeft = "10px";
+
+			label.appendChild(architectureButton);
+			
 			mxEvent.addListener(img, 'click', function()
 			{
 				ui.actions.get('formatPanel').funct();
+			});
+
+			mxEvent.addListener(architectureButton, 'click', function()
+			{
+				console.log("Code is here!" + Math.random());
+				//ui.actions.get('architecture').funct();
 			});
 		}
 		
@@ -423,8 +440,10 @@ Format.prototype.refresh = function()
 		
 		var addClickHandler = mxUtils.bind(this, function(elt, panel, index)
 		{
+
 			var clickHandler = mxUtils.bind(this, function(evt)
 			{
+
 				if (currentLabel != elt)
 				{
 					if (containsLabel)
@@ -445,6 +464,49 @@ Format.prototype.refresh = function()
 					currentLabel = elt;
 					currentLabel.style.backgroundColor = '';
 					currentLabel.style.borderBottomWidth = '0px';
+
+					if(index >=0 && index <=3) {
+						if(document.getElementById('archl') != null){
+							document.getElementById('archl').style.backgroundColor = '';
+						}
+
+						if(panel != null  && document.getElementById('archBasePanel') != null){
+
+							var item = document.getElementById('archBasePanel');
+
+							if(document.getElementById('archBasePanel').childNodes[0] != null) {
+
+								var oldnode = item.childNodes[0];
+
+								switch(index){
+									case 0:
+										console.log('uncertainty');
+										item.replaceChild(uncertaintyPanel, oldnode);
+										break;
+									case 1:
+										console.log('risk');
+										item.replaceChild(riskPanel, oldnode);
+										break;
+									case 2:
+										console.log('mitigation');
+										item.replaceChild(mitigationPanel, oldnode);
+										break;
+									case 3:
+										console.log('outcome');
+										item.replaceChild(outcomePanel, oldnode);
+										break;
+								}
+
+								item.style.display = 'block';
+								item.childNodes[0].display = 'block';
+								console.log(item.childNodes[0].innerHTML);
+							}
+
+						}
+
+					}else{
+						document.getElementById('archl').style.backgroundColor = this.inactiveTabBackgroundColor;
+					}
 					
 					if (currentPanel != panel)
 					{
@@ -480,15 +542,109 @@ Format.prototype.refresh = function()
 		label.style.backgroundColor = this.inactiveTabBackgroundColor;
 		label.style.borderLeftWidth = '1px';
 		label.style.cursor = 'pointer';
-		label.style.width = (containsLabel) ? '50%' : '33.3%';
-		label.style.width = (containsLabel) ? '50%' : '33.3%';
+		label.style.width = (containsLabel) ? '50%' : '25%';
+		label.style.width = (containsLabel) ? '50%' : '25%';
 		var label2 = label.cloneNode(false);
 		var label3 = label2.cloneNode(false);
+		var label4 = label3.cloneNode(false);
+		label4.id = 'archl';
+		label4.style.borderWidth = '0px 1px 1px 1px';
 
 		// Workaround for ignored background in IE
 		label2.style.backgroundColor = this.inactiveTabBackgroundColor;
 		label3.style.backgroundColor = this.inactiveTabBackgroundColor;
+		label4.style.backgroundColor = this.inactiveTabBackgroundColor;
+
+		//Architecture
+		mxUtils.write(label4, "Arch");
+		div.appendChild(label4);
+
+		var architecturePanel = div.cloneNode(false);
+		architecturePanel.style.padding = '5px 10px 0px 10px';
+		architecturePanel.id = 'arch';
+		architecturePanel.style.display = 'none';
+
+		var uncertaintyPanel = div.cloneNode(false);
+		var riskPanel = uncertaintyPanel.cloneNode(false);
+		var mitigationPanel = riskPanel.cloneNode(false);
+		var outcomePanel = mitigationPanel.cloneNode(false);
 		
+		uncertaintyPanel.innerHTML = 'Uncertainty panel';
+		riskPanel.innerHTML = "Risk panel";
+		mitigationPanel.innerHTML = "Mitigation panel";
+		outcomePanel.innerHTML = "Outcome panel";
+
+		architecturePanel.appendChild(divArch);
+
+
+		labelUncertainty = label.cloneNode(false);
+		labelRisk = label.cloneNode(false);
+		labelMitigation = label.cloneNode(false);
+		labelOutcome = label.cloneNode(false);
+		labelOutcome.style.borderWidth = '0px 1px 1px 1px';
+
+		mxUtils.write(labelUncertainty, "Uncertainty");
+		labelUncertainty.style.fontSize = '10px';
+
+		mxUtils.write(labelRisk, "Risk");
+		labelRisk.style.fontSize = '10px';
+
+		mxUtils.write(labelMitigation, "Mitigation");
+		labelMitigation.style.fontSize = '10px';
+
+		mxUtils.write(labelOutcome, "Outcome");
+		labelOutcome.style.fontSize = '10px';
+
+
+		this.panels.push(new UncertaintyFormatPanel(this, ui, uncertaintyPanel));
+		this.panels.push(new RiskFormatPanel(this, ui, riskPanel));
+		this.panels.push(new MitigationFormatPanel(this, ui, mitigationPanel));
+		this.panels.push(new OutcomeFormatPanel(this, ui, outcomePanel));
+
+		architecturePanel.appendChild(uncertaintyPanel);
+		
+		addClickHandler(labelUncertainty, architecturePanel, idx++);
+		addClickHandler(labelRisk, architecturePanel, idx++);
+		addClickHandler(labelMitigation, architecturePanel, idx++);
+		addClickHandler(labelOutcome, architecturePanel, idx++);
+		
+		divArch.appendChild(labelUncertainty);
+		divArch.appendChild(labelRisk);
+		divArch.appendChild(labelMitigation);
+		divArch.appendChild(labelOutcome);
+
+
+		var architectureBasePanel = uncertaintyPanel.cloneNode(false);
+		architectureBasePanel.id = 'archBasePanel';
+
+		architecturePanel.appendChild(architectureBasePanel);
+		architectureBasePanel.appendChild(uncertaintyPanel);
+
+
+/*
+		var uncertaintySections = ["Uncertainty","Risk", "Mitigation", "Outcome"];
+
+		var id = 100;
+
+		uncertaintySections.forEach(element => {
+
+			var e = document.createElement('div');
+			e.className = 'geFormatSection';
+
+			e.id = id++;
+
+			e.appendChild(BaseFormatPanel.prototype.createTitle.call(this, element));
+			architecturePanel.appendChild(e);
+
+			mxUtils.br(architecturePanel,3);
+		});
+
+*/
+
+		this.panels.push(new ArchitectureFormatPanel(this, ui, architecturePanel));
+		this.container.appendChild(architecturePanel);
+		addClickHandler(label4, architecturePanel, idx++);
+
 		// Style
 		if (containsLabel)
 		{
@@ -507,7 +663,7 @@ Format.prototype.refresh = function()
 
 			addClickHandler(label, stylePanel, idx++);
 		}
-		
+
 		// Text
 		mxUtils.write(label2, mxResources.get('text'));
 		div.appendChild(label2);
@@ -519,7 +675,9 @@ Format.prototype.refresh = function()
 		
 		// Arrange
 		mxUtils.write(label3, mxResources.get('arrange'));
+		label3.style.borderWidth = '0px 1px 1px 1px';
 		div.appendChild(label3);
+
 
 		var arrangePanel = div.cloneNode(false);
 		arrangePanel.style.display = 'none';
@@ -528,6 +686,7 @@ Format.prototype.refresh = function()
 		
 		addClickHandler(label2, textPanel, idx++);
 		addClickHandler(label3, arrangePanel, idx++);
+		
 	}
 };
 
@@ -5455,6 +5614,9 @@ DiagramFormatPanel.prototype.init = function()
 		this.container.appendChild(this.addPaperSize(this.createPanel()));
 		this.container.appendChild(this.addStyleOps(this.createPanel()));
 	}
+
+	mxUtils.br(this.container);
+	this.container.appendChild(this.createTitle("Architecture"));
 };
 
 /**
@@ -5905,3 +6067,92 @@ DiagramFormatPanel.prototype.destroy = function()
 		this.gridEnabledListener = null;
 	}
 };
+
+
+/**
+ * Adds the label menu items Architecture.
+ */
+ArchitectureFormatPanel = function(format, editorUi, container)
+{
+	BaseFormatPanel.call(this, format, editorUi, container);
+	this.init();
+};
+
+mxUtils.extend(ArchitectureFormatPanel, BaseFormatPanel);
+
+ArchitectureFormatPanel.prototype.init = function()
+{
+	this.container.style.borderBottom = 'none';
+	//this.addFont(this.container);
+};
+
+/**
+ * Adds the label menu items Uncertainty.
+ */
+UncertaintyFormatPanel = function(format, editorUi, container)
+{
+	BaseFormatPanel.call(this, format, editorUi, container);
+	this.init();
+};
+
+mxUtils.extend(UncertaintyFormatPanel, BaseFormatPanel);
+
+UncertaintyFormatPanel.prototype.init = function()
+{
+	this.container.style.borderBottom = 'none';
+	//this.addFont(this.container);
+};
+
+/**
+ * Adds the label menu items Risk.
+ */
+RiskFormatPanel = function(format, editorUi, container)
+{
+	BaseFormatPanel.call(this, format, editorUi, container);
+	this.init();
+};
+
+mxUtils.extend(RiskFormatPanel, BaseFormatPanel);
+
+RiskFormatPanel.prototype.init = function()
+{
+	this.container.style.borderBottom = 'none';
+	//this.addFont(this.container);
+};
+
+/**
+ * Adds the label menu items Mitigation.
+ */
+MitigationFormatPanel = function(format, editorUi, container)
+{
+	BaseFormatPanel.call(this, format, editorUi, container);
+	this.init();
+};
+
+mxUtils.extend(MitigationFormatPanel, BaseFormatPanel);
+
+MitigationFormatPanel.prototype.init = function()
+{
+	this.container.style.borderBottom = 'none';
+	//this.addFont(this.container);
+};
+
+/**
+ * Adds the label menu items Outcome.
+ */
+OutcomeFormatPanel = function(format, editorUi, container)
+{
+	BaseFormatPanel.call(this, format, editorUi, container);
+	this.init();
+};
+
+mxUtils.extend(OutcomeFormatPanel, BaseFormatPanel);
+
+OutcomeFormatPanel.prototype.init = function()
+{
+	this.container.style.borderBottom = 'none';
+	//this.addFont(this.container);
+};
+
+
+

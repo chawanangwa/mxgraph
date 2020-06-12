@@ -990,7 +990,7 @@ EditorUi.prototype.formatEnabled = true;
 /**
  * Specifies the width of the format panel. Default is 240.
  */
-EditorUi.prototype.formatWidth = 240;
+EditorUi.prototype.formatWidth = 260;
 
 /**
  * Specifies the height of the toolbar. Default is 38.
@@ -2440,7 +2440,7 @@ EditorUi.prototype.toggleFormatPanel = function(forceHide)
 {
 	if (this.format != null)
 	{
-		this.formatWidth = (forceHide || this.formatWidth > 0) ? 0 : 240;
+		this.formatWidth = (forceHide || this.formatWidth > 0) ? 0 : 250;
 		this.formatContainer.style.display = (forceHide || this.formatWidth > 0) ? '' : 'none';
 		this.refresh();
 		this.format.refresh();
@@ -3253,6 +3253,7 @@ EditorUi.prototype.refresh = function(sizeDidChange)
 	}
 	
 	var fw = (this.format != null) ? this.formatWidth : 0;
+
 	this.sidebarContainer.style.top = tmp + 'px';
 	this.sidebarContainer.style.width = effHsplitPosition + 'px';
 	this.formatContainer.style.top = tmp + 'px';
