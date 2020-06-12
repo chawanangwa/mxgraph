@@ -613,7 +613,6 @@ Format.prototype.refresh = function()
 		divArch.appendChild(labelMitigation);
 		divArch.appendChild(labelOutcome);
 
-
 		var architectureBasePanel = uncertaintyPanel.cloneNode(false);
 		architectureBasePanel.id = 'archBasePanel';
 
