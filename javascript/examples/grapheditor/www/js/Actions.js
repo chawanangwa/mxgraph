@@ -1131,6 +1131,25 @@ Actions.prototype.init = function()
 			dlg.init();
 		}
 	}), null, null, Editor.ctrlKey + '+E');
+	this.addAction('editArch', mxUtils.bind(this, function(textValue, archAttrilabel, archAttriContainer)
+	{
+		var cells = graph.getSelectionCells();
+		
+		if (cells != null && cells.length > 0)
+		{	
+	    	var dlg = new TextareaDialog(this.editorUi, archAttrilabel + ':',
+	    		textValue.data || '', function(newValue)
+			{
+	    		if (newValue != null)
+				{
+					textValue.data = mxUtils.trim(newValue);
+					archAttriContainer.setAttribute('title', (archAttrilabel + ":\n" + textValue.data));
+				}
+			}, null, null, 400, 220);
+			this.editorUi.showDialog(dlg.container, 420, 300, true, true);
+			dlg.init();
+		}
+	}), null, null, Editor.ctrlKey + '+E');
 	this.addAction('setAsDefaultStyle', function()
 	{
 		if (graph.isEnabled() && !graph.isSelectionEmpty())

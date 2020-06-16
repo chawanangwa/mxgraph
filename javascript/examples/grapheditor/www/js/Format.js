@@ -386,7 +386,6 @@ Format.prototype.refresh = function()
 		// and the menu item in the format menu
 		if (this.showCloseButton)
 		{
-			
 			var img = document.createElement('img');
 			img.setAttribute('border', '0');
 			img.setAttribute('src', Dialog.prototype.closeImage);
@@ -402,7 +401,6 @@ Format.prototype.refresh = function()
 			img.style.padding = '1px';
 			img.style.opacity = 0.5;
 			label.appendChild(img)
-			
 
 			var architectureButton = document.createElement('button');
 			architectureButton.innerHTML = "Architecture";
@@ -480,26 +478,22 @@ Format.prototype.refresh = function()
 
 								switch(index){
 									case 0:
-										console.log('uncertainty');
 										item.replaceChild(uncertaintyPanel, oldnode);
 										break;
 									case 1:
-										console.log('risk');
 										item.replaceChild(riskPanel, oldnode);
 										break;
 									case 2:
-										console.log('mitigation');
 										item.replaceChild(mitigationPanel, oldnode);
 										break;
 									case 3:
-										console.log('outcome');
 										item.replaceChild(outcomePanel, oldnode);
 										break;
 								}
 
+								//show architecture panel blocks
 								item.style.display = 'block';
-								item.childNodes[0].display = 'block';
-								console.log(item.childNodes[0].innerHTML);
+								item.childNodes[0].display = 'block';								
 							}
 
 						}
@@ -568,14 +562,8 @@ Format.prototype.refresh = function()
 		var riskPanel = uncertaintyPanel.cloneNode(false);
 		var mitigationPanel = riskPanel.cloneNode(false);
 		var outcomePanel = mitigationPanel.cloneNode(false);
-		
-		uncertaintyPanel.innerHTML = 'Uncertainty panel';
-		riskPanel.innerHTML = "Risk panel";
-		mitigationPanel.innerHTML = "Mitigation panel";
-		outcomePanel.innerHTML = "Outcome panel";
 
 		architecturePanel.appendChild(divArch);
-
 
 		labelUncertainty = label.cloneNode(false);
 		labelRisk = label.cloneNode(false);
@@ -594,7 +582,6 @@ Format.prototype.refresh = function()
 
 		mxUtils.write(labelOutcome, "Outcome");
 		labelOutcome.style.fontSize = '10px';
-
 
 		this.panels.push(new UncertaintyFormatPanel(this, ui, uncertaintyPanel));
 		this.panels.push(new RiskFormatPanel(this, ui, riskPanel));
@@ -622,6 +609,142 @@ Format.prototype.refresh = function()
 		this.panels.push(new ArchitectureFormatPanel(this, ui, architecturePanel));
 		this.container.appendChild(architecturePanel);
 		addClickHandler(label4, architecturePanel, idx++);
+
+		// Uncertainty - event
+		mxEvent.addListener(labelUncertainty, 'click', function()
+		{
+			var cells = graph.getSelectionCells();
+
+			uncertaintyPanel.innerHTML = '';
+
+			//System
+			var labelOptionLabel = "System";
+			var system_description = "Flood monitoring systems (FMS) deploy in diverse but often harsh environments that expose them to various challenges making them vulnerable to uncertainty. Therefore, the software and hardware infrastructure of FMS needs to handle such environments and the associated uncertainties. Uncertainty can influence not only the hardware and software aspect of FMS, but also such aspects as the budget and project management and more.";
+
+			help_text_tag_with_default(ui, labelOptionLabel, uncertaintyPanel, system_description);
+
+			//Sub-system
+			var labelOptionLabel = "Sub-system";
+			var system_description = "Network, sensors, data storage, monitors and others";
+			help_text_tag_with_default(ui, labelOptionLabel, uncertaintyPanel, system_description);
+
+			//Environment
+			var labelOptionLabel = "Environment";
+			var system_description = "Operating, development, legal, marine etc.";
+			help_text_tag_with_default(ui, labelOptionLabel, uncertaintyPanel, system_description);
+
+			//Environment monitoring properties
+			var labelOptionLabel = "Environment monitoring property";
+			var system_description = "Operating environment monitoring properties: sensors, network-bandwidth, network connectivity, water-level meter and others.";
+			help_text_tag_with_default(ui, labelOptionLabel, uncertaintyPanel, system_description);
+
+			//Uncertainty nature
+			var optionsArray = ['Aleatory', 'Epistemic', 'Other'];
+			var labelOptionLabel = "Nature";
+			help_select_tag_with_option(labelOptionLabel, uncertaintyPanel, optionsArray);
+
+			//Perspective
+			optionsArray = ["Subjective", "Objective"];
+			labelOptionLabel = "Perspective";
+			help_select_tag_with_option(labelOptionLabel, uncertaintyPanel, optionsArray);
+
+			//Source
+			optionsArray = ["External", "Internal"];
+			labelOptionLabel = "Source";
+			help_select_tag_with_option(labelOptionLabel, uncertaintyPanel, optionsArray);			
+
+			//Sub source
+			var labelOptionLabel = "Sub-source";
+			var system_description = "Interference with the network routers from the environment";
+
+			help_text_tag_with_default(ui, labelOptionLabel, uncertaintyPanel, system_description);
+
+			//Uncertainty description
+			var labelOptionLabel = "Uncertainty description";
+			var system_description = "Network connectivity may fail";
+
+			help_text_tag_with_default(ui, labelOptionLabel, uncertaintyPanel, system_description);
+
+			//Related uncertainties
+			var labelOptionLabel = "Related uncertainty";
+			var system_description = "Network connectivity may fail";
+
+			help_text_tag_with_default(ui, labelOptionLabel, uncertaintyPanel, system_description);
+			
+			//Deminsion [location, level, emerging time, life-time, pattern, measure, indicator]
+			var labelOptionLabel = "Location";
+			var system_description = "Network component such as a router";
+			help_text_tag_with_default(ui, labelOptionLabel, uncertaintyPanel, system_description);
+			
+			optionsArray = ["Known Unknown", "Unknown unknown", "Statistical"];
+			labelOptionLabel = "Level";
+			help_select_tag_with_option(labelOptionLabel, uncertaintyPanel, optionsArray);
+
+			optionsArray = ["Requirement", "Development", "Runtime"];
+			labelOptionLabel = "Emerging Time";
+			help_select_tag_with_option(labelOptionLabel, uncertaintyPanel, optionsArray);
+
+			var labelOptionLabel = "Life time";
+			var system_description = "Uncertainty from failure exists throughout the lifetime of the system";
+			help_text_tag_with_default(ui, labelOptionLabel, uncertaintyPanel, system_description);
+
+			optionsArray = ["Periodic", "Persistence ", "Transient", "Sporadic"];
+			labelOptionLabel = "Pattern";
+			help_select_tag_with_option(labelOptionLabel, uncertaintyPanel, optionsArray);
+
+			optionsArray = ["Probability", "Persistence ", "Fuzziness", "Temporal logic", "Non-specificity"];
+			labelOptionLabel = "Measure";
+			help_select_tag_with_option(labelOptionLabel, uncertaintyPanel, optionsArray);
+
+			var labelOptionLabel = "Indicator";
+			var system_description = "Downtime";
+			help_text_tag_with_default(ui, labelOptionLabel, uncertaintyPanel, system_description);
+		});
+
+		// Uncertainty - risk
+		mxEvent.addListener(labelRisk, 'click', function()
+		{
+			var cells = graph.getSelectionCells();
+			riskPanel.innerHTML = "";
+
+			//Futures
+			optionsArray = ["Possible", "Plausible", "Probable", "Desirable"];
+			labelOptionLabel = "Futures";
+			help_select_tag_with_option(labelOptionLabel, riskPanel, optionsArray);
+		});
+
+		// Uncertainty - Mitigation
+		mxEvent.addListener(labelMitigation, 'click', function()
+		{
+			var cells = graph.getSelectionCells();
+			mitigationPanel.innerHTML = "";
+
+			//Futures
+			optionsArray = ["Possible", "Plausible", "Probable", "Desirable"];
+			labelOptionLabel = "Futures";
+			help_select_tag_with_option(labelOptionLabel, mitigationPanel, optionsArray);
+
+		});
+
+		// Uncertainty - Mitigation
+		mxEvent.addListener(labelOutcome, 'click', function()
+		{
+			var cells = graph.getSelectionCells();
+			outcomePanel.innerHTML = "";
+			let breakLine = document.createElement('br');
+
+			//Futures
+			optionsArray = ["Possible", "Plausible", "Probable", "Desirable"];
+			labelOptionLabel = "Futures";
+			help_select_tag_with_option(labelOptionLabel, outcomePanel, optionsArray);
+
+			cells.forEach(element => {
+				let idDiv = document.createElement('div');
+				idDiv.appendChild(breakLine);
+				idDiv.innerHTML = "id: " + element.id;
+				outcomePanel.appendChild(idDiv);
+			});
+		});
 
 		// Style
 		if (containsLabel)
@@ -656,7 +779,6 @@ Format.prototype.refresh = function()
 		label3.style.borderWidth = '0px 1px 1px 1px';
 		div.appendChild(label3);
 
-
 		var arrangePanel = div.cloneNode(false);
 		arrangePanel.style.display = 'none';
 		this.panels.push(new ArrangePanel(this, ui, arrangePanel));
@@ -664,7 +786,21 @@ Format.prototype.refresh = function()
 		
 		addClickHandler(label2, textPanel, idx++);
 		addClickHandler(label3, arrangePanel, idx++);
-		
+
+		switch(currentLabel.innerHTML) {
+
+			case "Uncertainty":
+				labelUncertainty.click();
+				break;
+			case "Risk":
+				labelRisk.click();
+				break;
+			case "Mitigation":
+				labelMitigation.click();
+				break;
+			case "Outcome":
+				labelOutcome.click();
+		}
 	}
 };
 
@@ -6132,5 +6268,105 @@ OutcomeFormatPanel.prototype.init = function()
 	//this.addFont(this.container);
 };
 
+function help_select_tag_with_option(labelOptionLabelValue, archPanel, dirs) {
+
+	//Label container
+	var labelOptionLabel = document.createElement('div');
+	labelOptionLabel.style.padding = '12px 0px 12px 1px';
+	labelOptionLabel.style.position = 'relative';
+	labelOptionLabel.style.borderWidth = '0px';
+	labelOptionLabel.style.marginLeft = '0px';
+	labelOptionLabel.style.paddingTop = '4px';
+	labelOptionLabel.style.paddingBottom = '10px';
+	labelOptionLabel.style.fontWeight = 'normal';
+	labelOptionLabel.style.minHeight = '9px';
+	//labelOptionLabel.className = 'geFormatSection';
+
+	//write label on a DIV
+	//mxUtils.write(labelOptionLabel, labelOptionLabelValue);
+
+	//Label
+	var labForOptionValue = document.createElement('span');
+	labForOptionValue.className = 'geFormatSection';
+	labForOptionValue.style.padding = '0px 0px 0px 0px';
+	labForOptionValue.style.width = '85px';
+	labForOptionValue.innerHTML = labelOptionLabelValue;
+	labForOptionValue.setAttribute('title',labelOptionLabelValue);
+	labForOptionValue.style.display = 'block';
+	labForOptionValue.style.overflow = 'hidden';
+	labForOptionValue.style.whiteSpace = 'nowrap';
+	labForOptionValue.style.textOverflow = 'ellipsis';
+	labForOptionValue.style.marginLeft = '5px';
+	labForOptionValue.style.float ='left';
+
+	//Drop dato options
+	var dirSelect = document.createElement('select');
+	dirSelect.style.position = 'absolute';
+	dirSelect.style.right = '20px';
+	dirSelect.style.width = '97px';
+	dirSelect.style.marginTop = '-2px';
+	dirSelect.style.float ='left';
+
+	for (var i = 0; i < dirs.length; i++) {
+		var dirOption = document.createElement('option');
+		dirOption.setAttribute('value', dirs[i]);
+		mxUtils.write(dirOption, dirs[i]);
+		dirSelect.appendChild(dirOption);
+	}
+
+	labelOptionLabel.appendChild(labForOptionValue);
+	labelOptionLabel.appendChild(dirSelect);
+	archPanel.appendChild(labelOptionLabel);
+}
+
+function help_text_tag_with_default(ui, labelOptionLabelValue, archPanel, textValue) {
+
+	//Attribute container
+	var labelOptionLabel = document.createElement('div');
+	labelOptionLabel.style.padding = '12px 0px 12px 1px';
+	labelOptionLabel.style.position = 'relative';
+	labelOptionLabel.style.borderWidth = '0px';
+	labelOptionLabel.style.marginLeft = '0px';
+	labelOptionLabel.style.paddingTop = '4px';
+	labelOptionLabel.style.paddingBottom = '15px';
+	labelOptionLabel.style.fontWeight = 'normal';
+	labelOptionLabel.style.minHeight = '40px';
+
+	//Label
+	var labForOptionValue = document.createElement('span');
+	labForOptionValue.className = 'geFormatSection';
+	labForOptionValue.style.padding = '5px 5px 5px 5px';
+	labForOptionValue.style.width = '40px';
+	labForOptionValue.innerHTML = labelOptionLabelValue;
+	labForOptionValue.setAttribute('title',labelOptionLabelValue);
+	labForOptionValue.style.display = 'block';
+	labForOptionValue.style.overflow = 'hidden';
+	labForOptionValue.style.whiteSpace = 'nowrap';
+	labForOptionValue.style.textOverflow = 'ellipsis';
+	labForOptionValue.style.float ='left';
+
+	//Architecture attribute text container and value
+	var archAttriTextNodeContainer = document.createElement('textarea');
+	archAttriTextNodeContainer.style.position = 'absolute';
+	archAttriTextNodeContainer.style.marginLeft = '10px';
+	archAttriTextNodeContainer.style.marginTop = '-2px';
+	archAttriTextNodeContainer.setAttribute('cols', '21');
+	archAttriTextNodeContainer.setAttribute('rows', '2');
+	archAttriTextNodeContainer.style.float = 'left';
+
+	var archAttriTextNode = document.createTextNode(textValue);
+	archAttriTextNodeContainer.appendChild(archAttriTextNode);
+	
+	archAttriTextNodeContainer.setAttribute('title', (labelOptionLabelValue + ":\n" + archAttriTextNode.data));
+
+	mxEvent.addListener(archAttriTextNodeContainer, 'click', function()
+	{
+		ui.actions.get('editArch').funct(archAttriTextNode, labelOptionLabelValue, archAttriTextNodeContainer);
+	});
+
+	labelOptionLabel.appendChild(labForOptionValue);
+	labelOptionLabel.appendChild(archAttriTextNodeContainer);
+	archPanel.appendChild(labelOptionLabel);
+}
 
 
