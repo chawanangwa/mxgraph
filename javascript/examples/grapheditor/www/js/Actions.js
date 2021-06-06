@@ -1143,6 +1143,25 @@ Actions.prototype.init = function()
 	    		if (newValue != null)
 				{
 					textValue.data = mxUtils.trim(newValue);
+
+					//Update value in graph cells
+					var value = graph.getModel().getValue(cells[0]);
+
+					if (!mxUtils.isNode(value))
+					{
+						var doc = mxUtils.createXmlDocument();
+						var obj = doc.createElement('object');
+						obj.setAttribute('label', value || '');
+						value = obj;
+					}
+
+					if(value.hasAttribute("uncertaintyData")) {
+						uncertaintyData = JSON.parse(value.getAttribute("uncertaintyData"));
+						uncertaintyData[archAttrilabel] = textValue.data;
+						value.setAttribute("uncertaintyData", JSON.stringify(uncertaintyData));			
+						graph.getModel().setValue(cells[0], value);
+					}
+
 					archAttriContainer.setAttribute('title', (archAttrilabel + ":\n" + textValue.data));
 				}
 			}, null, null, 400, 220);
@@ -1150,6 +1169,81 @@ Actions.prototype.init = function()
 			dlg.init();
 		}
 	}), null, null, Editor.ctrlKey + '+E');
+	this.addAction('changeArchSelectOption', function(labelOptionLabelValue, dirSelect, suboptions=false, targetID)
+	{
+
+		console.log(suboptions + " =  suboptions = " + dirSelect.value);
+		
+		var cells = graph.getSelectionCells();
+
+		if (cells != null && cells.length > 0)
+		{
+			//Update value in graph cells
+			var value = graph.getModel().getValue(cells[0]);
+
+			if (!mxUtils.isNode(value))
+			{
+				var doc = mxUtils.createXmlDocument();
+				var obj = doc.createElement('object');
+				obj.setAttribute('label', value || '');
+				value = obj;
+			}
+
+			if(value.hasAttribute("uncertaintyData")) {
+				uncertaintyData = JSON.parse(value.getAttribute("uncertaintyData"));
+				uncertaintyData[labelOptionLabelValue].value = dirSelect.value;
+				value.setAttribute("uncertaintyData", JSON.stringify(uncertaintyData));			
+				graph.getModel().setValue(cells[0], value);
+			}
+
+			if(suboptions && dirSelect.value.toLowerCase()) {
+
+				id = targetID + "Select";
+				selectOption = document.getElementById(id);
+
+				if(selectOption && uncertaintyData[dirSelect.value.toLowerCase()]) {
+
+					id = targetID + "label";
+					document.getElementById(id).innerHTML = dirSelect.value;
+					document.getElementById(id).setAttribute('title',dirSelect.value);
+	
+					id = targetID + "Select";
+					selectOption = document.getElementById(id);
+
+					selectOption.length = 0;
+
+					var dirOption = document.createElement('option');
+					dirOption.setAttribute('value', "");
+					mxUtils.write(dirOption, "");
+					selectOption.appendChild(dirOption);
+
+					console.log(dirSelect.value.toLowerCase());
+					dirs = uncertaintyData[dirSelect.value.toLowerCase()].options;
+				
+					for (var i = 0; i < dirs.length; i++) {
+						dirOption = document.createElement('option');
+						dirOption.setAttribute('value', dirs[i]);
+						mxUtils.write(dirOption, dirs[i]);
+						selectOption.appendChild(dirOption);
+					}
+				}
+
+			}
+
+			console.log("Checking here again: " + dirSelect.value.toLowerCase());
+
+			modalOperatorProcessor(graph, cells[0], dirSelect.value);
+			
+			if(dirSelect.value.toLowerCase()=="temporal") {
+				temporalOperatorProcessor(ui, graph, cells[0], dirSelect.value);
+			}
+			
+			
+		}
+
+
+
+	}, null, null, Editor.ctrlKey + '+Shift+D');
 	this.addAction('setAsDefaultStyle', function()
 	{
 		if (graph.isEnabled() && !graph.isSelectionEmpty())
@@ -1521,3 +1615,50 @@ Action.prototype.isSelected = function()
 {
 	return this.selectedCallback();
 };
+
+function modalOperatorProcessor(graph, cell, operator) {
+
+	let color = "green";
+
+	if(operator == "MAY") {
+		color = "yellow";
+	}
+
+	let st = cell.getStyle();
+	checkFillColor = false;
+	st = st.replace(";;",";");
+	st = st.split(";");
+
+	for(i=0; i < st.length; i++) {
+		tmp = st[i].split("=");
+
+		if(tmp.length > 0) {
+			if(tmp[0] == "strokeColor") {
+				checkFillColor = true;
+				st[i] = "strokeColor=" + color + ";";
+				break;
+			}
+		}
+	}
+
+	if(checkFillColor) {
+		st = st.join(";") + ";";
+	}else{
+		st = st.join(";") + ";strokeColor=" + color + ";";;
+	}
+
+	st = st.replace(";;",";");
+	graph.getModel().setStyle(cell, st);
+}
+
+function temporalOperatorProcessor(ui, graph, cell, operator) {
+	
+	ui.showDialog(new temporalOperatorDialog(ui).container, 360,
+	(ui.pages != null && ui.pages.length > 1) ?
+	450 : 370, true, true);
+
+}
+
+function ordinalOperatorProcessor(graph, cell, operator) {
+
+}

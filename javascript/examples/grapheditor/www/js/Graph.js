@@ -3253,6 +3253,9 @@ Graph.prototype.getTooltipForCell = function(cell)
 	if (mxUtils.isNode(cell.value))
 	{
 		var tmp = cell.value.getAttribute('tooltip');
+
+		console.log("Checking to see how things are going");
+		console.log(tmp + " what is tha value here");
 		
 		if (tmp != null)
 		{
@@ -3279,7 +3282,16 @@ Graph.prototype.getTooltipForCell = function(cell)
 			{
 				if (mxUtils.indexOf(ignored, attrs[i].nodeName) < 0 && attrs[i].nodeValue.length > 0)
 				{
-					temp.push({name: attrs[i].nodeName, value: attrs[i].nodeValue});
+					if((attrs[i].nodeName) == "uncertaintyData"){
+						var valueJson = JSON.parse(attrs[i].nodeValue);
+						temp.push({name: "Uncertainty-description", value: valueJson.description});
+						temp.push({name: "Uncertainty-lifetime", value: valueJson.lifetime});
+						temp.push({name: "Uncertainty-environment", value: valueJson.environment});
+						temp.push({name: "Uncertainty-location", value: valueJson.location});
+					}else{
+						temp.push({name: attrs[i].nodeName, value: attrs[i].nodeValue});
+					}
+					
 				}
 			}
 			
@@ -3305,9 +3317,14 @@ Graph.prototype.getTooltipForCell = function(cell)
 				if (temp[i].name != 'link' || !this.isCustomLink(temp[i].value))
 				{
 					tip += ((temp[i].name != 'link') ? '<b>' + temp[i].name + ':</b> ' : '') +
-						mxUtils.htmlEntities(temp[i].value) + '\n';
+					mxUtils.htmlEntities(temp[i].value) + '\n';
+
+					//tip += ((temp[i].name != 'link') ? '<b>' + temp[i].name + ':</b> ' : '') +
+					//	mxUtils.htmlEntities(temp[i].value) + '\n';
 				}
 			}
+
+			console.log(tip);
 			
 			if (tip.length > 0)
 			{

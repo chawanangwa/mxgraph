@@ -9125,7 +9125,7 @@ mxGraph.prototype.getTooltip = function(state, node, x, y)
 			tip = this.getTooltipForCell(state.cell);
 		}
 	}
-	
+	console.log("Working with tooltips --- -");
 	return tip;
 };
 
@@ -9164,6 +9164,8 @@ mxGraph.prototype.getTooltipForCell = function(cell)
 		tip = this.convertValueToString(cell);
 	}
 	
+	console.log("This is the cell tooltip --- " + tip);
+
 	return tip;
 };
 

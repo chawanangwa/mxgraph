@@ -755,7 +755,7 @@ var mxUtils =
 
 		if (newline == null || newline)
 		{
-			s = s.replace(/\n/g, '&#xa;');
+			s = s.replace(/\n/g, '&#xa;&#13;&#10;');
 		}
 		
 		return s;

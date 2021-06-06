@@ -1348,7 +1348,19 @@ var EditDataDialog = function(ui, cell)
 	var addTextArea = function(index, name, value)
 	{
 		names[index] = name;
+
+		//format Json textarea field
+		if(name == "uncertaintyData") {
+			var valueJson = JSON.parse(value)
+			value = JSON.stringify(valueJson, undefined, 4);
+		}
+
 		texts[index] = form.addTextarea(names[count] + ':', value, 2);
+
+		if(name == "uncertaintyData" && value) {
+			texts[index].setAttribute('title', value);
+		}
+
 		texts[index].style.width = '100%';
 		
 		if (value.indexOf('\n') > 0)
@@ -1871,6 +1883,7 @@ var OutlineWindow = function(editorUi, x, y, w, h)
 	
 	function update()
 	{
+
 		outline.outline.pageScale = graph.pageScale;
 		outline.outline.pageFormat = graph.pageFormat;
 		outline.outline.pageVisible = graph.pageVisible;
@@ -2212,7 +2225,8 @@ var LayersWindow = function(editorUi, x, y, w, h)
 	}
 	
 	ldiv.appendChild(addLink);
-	div.appendChild(ldiv);	
+
+	div.appendChild(ldiv);
 	
 	function refresh()
 	{
@@ -2500,7 +2514,8 @@ var LayersWindow = function(editorUi, x, y, w, h)
 		}
 	});
 
-	this.window = new mxWindow(mxResources.get('layers'), div, x, y, w, h, true, true);
+	//this.window = new mxWindow(mxResources.get('layers'), div, x, y, w, h, true, true);
+	this.window = new mxWindow("Views", div, x, y, w, h, true, true);
 	this.window.minimumSize = new mxRectangle(0, 0, 120, 120);
 	this.window.destroyOnClose = false;
 	this.window.setMaximizable(false);
@@ -2551,3 +2566,1120 @@ var LayersWindow = function(editorUi, x, y, w, h)
 		this.window.destroy();
 	}
 };
+
+
+/**
+ * Constructs a new print dialog.
+ */
+var temporalOperatorDialog = function(editorUi, title)
+{
+	this.create(editorUi, title);
+};
+
+/**
+ * Constructs a new print dialog.
+ */
+
+	/**
+	 * Constructs a new print dialog.
+	 */
+
+temporalOperatorDialog.prototype.create = function(editorUi, titleText)
+{
+    var graph = editorUi.editor.graph;
+    var div = document.createElement('div');
+	div.style.height = "100%";
+	
+    var title = document.createElement('h3');
+    title.style.width = '100%';
+    title.style.textAlign = 'center';
+    title.style.marginTop = '0px';
+    //mxUtils.write(title, titleText || mxResources.get('print'));
+    mxUtils.write(title, titleText || "Temporal Operators");
+    div.appendChild(title);
+    
+    var pageCount = 1;
+    var currentPage = 1;
+
+    // Pages
+    var pagesSection = document.createElement('div');
+    pagesSection.style.cssText = 'border-bottom:1px solid lightGray;padding-bottom:12px;margin-bottom:12px;';
+    
+    var allPagesRadio = document.createElement('input');
+    allPagesRadio.style.cssText = 'margin-right:8px;margin-bottom:8px;';
+    allPagesRadio.setAttribute('value', 'all');
+    allPagesRadio.setAttribute('type', 'radio');
+    allPagesRadio.setAttribute('name', 'pages-printdialog');
+    
+    pagesSection.appendChild(allPagesRadio);
+
+    var span = document.createElement('span');
+    mxUtils.write(span, mxResources.get('printAllPages'));
+    pagesSection.appendChild(span);
+
+    mxUtils.br(pagesSection);
+
+    // Pages ... to ...
+    var pagesRadio = allPagesRadio.cloneNode(true);
+    allPagesRadio.setAttribute('checked', 'checked');
+    pagesRadio.setAttribute('value', 'range');
+    pagesSection.appendChild(pagesRadio);
+    
+    var span = document.createElement('span');
+    mxUtils.write(span, mxResources.get('pages') + ':');
+    pagesSection.appendChild(span);
+    
+    var pagesFromInput = document.createElement('input');
+    pagesFromInput.style.cssText = 'margin:0 8px 0 8px;'
+    pagesFromInput.setAttribute('value', '1');
+    pagesFromInput.setAttribute('type', 'number');
+    pagesFromInput.setAttribute('min', '1');
+    pagesFromInput.style.width = '50px';
+    pagesSection.appendChild(pagesFromInput);
+    
+    var span = document.createElement('span');
+    mxUtils.write(span, mxResources.get('to'));
+    pagesSection.appendChild(span);
+    
+    var pagesToInput = pagesFromInput.cloneNode(true);
+    pagesSection.appendChild(pagesToInput);
+
+    mxEvent.addListener(pagesFromInput, 'focus', function()
+    {
+        pagesRadio.checked = true;
+    });
+    
+    mxEvent.addListener(pagesToInput, 'focus', function()
+    {
+        pagesRadio.checked = true;
+    });
+    
+    function validatePageRange()
+    {
+        pagesToInput.value = Math.max(1, Math.min(pageCount, Math.max(parseInt(pagesToInput.value), parseInt(pagesFromInput.value))));
+        pagesFromInput.value = Math.max(1, Math.min(pageCount, Math.min(parseInt(pagesToInput.value), parseInt(pagesFromInput.value))));
+    };
+    
+    mxEvent.addListener(pagesFromInput, 'change', validatePageRange);
+    mxEvent.addListener(pagesToInput, 'change', validatePageRange);
+    
+    if (editorUi.pages != null)
+    {
+        pageCount = editorUi.pages.length;
+
+        if (editorUi.currentPage != null)
+        {
+            for (var i = 0; i < editorUi.pages.length; i++)
+            {
+                if (editorUi.currentPage == editorUi.pages[i])
+                {
+                    currentPage = i + 1;
+                    pagesFromInput.value = currentPage;
+                    pagesToInput.value = currentPage;
+                    break;
+                }
+            }
+        }
+    }
+    
+    pagesFromInput.setAttribute('max', pageCount);
+    pagesToInput.setAttribute('max', pageCount);		
+    
+    if (pageCount > 1)
+    {
+        div.appendChild(pagesSection);
+    }
+    
+    // Adjust to ...
+    var adjustSection = document.createElement('div');
+    adjustSection.style.marginBottom = '10px';
+    
+    var adjustRadio = document.createElement('input');
+    adjustRadio.style.marginRight = '8px';
+    
+    adjustRadio.setAttribute('value', 'adjust');
+    adjustRadio.setAttribute('type', 'radio');
+    adjustRadio.setAttribute('name', 'printZoom');
+    adjustSection.appendChild(adjustRadio);
+
+    var span = document.createElement('span');
+    mxUtils.write(span, mxResources.get('adjustTo'));
+    adjustSection.appendChild(span);
+    
+    var zoomInput = document.createElement('input');
+    zoomInput.style.cssText = 'margin:0 8px 0 8px;';
+    zoomInput.setAttribute('value', '100 %');
+    zoomInput.style.width = '50px';
+    adjustSection.appendChild(zoomInput);
+    
+    mxEvent.addListener(zoomInput, 'focus', function()
+    {
+        adjustRadio.checked = true;
+    });
+    
+    div.appendChild(adjustSection);
+
+    // Fit to ...
+    var fitSection = pagesSection.cloneNode(false);
+
+    var fitRadio = adjustRadio.cloneNode(true);
+    fitRadio.setAttribute('value', 'fit');
+    adjustRadio.setAttribute('checked', 'checked');
+    
+    var spanFitRadio = document.createElement('div');
+    spanFitRadio.style.cssText = 'display:inline-block;height:100%;vertical-align:top;padding-top:2px;';
+    spanFitRadio.appendChild(fitRadio);
+    fitSection.appendChild(spanFitRadio);
+    
+    var table = document.createElement('table');
+    table.style.display = 'inline-block';
+    var tbody = document.createElement('tbody');
+    
+    var row1 = document.createElement('tr');
+    var row2 = row1.cloneNode(true);
+    
+    var td1 = document.createElement('td');
+    var td2 = td1.cloneNode(true);
+    var td3 = td1.cloneNode(true);
+    
+    var td4 = td1.cloneNode(true);
+    var td5 = td1.cloneNode(true);
+    var td6 = td1.cloneNode(true);
+    
+    td1.style.textAlign = 'right';
+    td4.style.textAlign = 'right';
+
+    mxUtils.write(td1, mxResources.get('fitTo'));
+    
+    var sheetsAcrossInput = document.createElement('input');
+    sheetsAcrossInput.style.cssText = 'margin:0 8px 0 8px;';
+    sheetsAcrossInput.setAttribute('value', '1');
+    sheetsAcrossInput.setAttribute('min', '1');
+    sheetsAcrossInput.setAttribute('type', 'number');
+    sheetsAcrossInput.style.width = '40px';
+    td2.appendChild(sheetsAcrossInput);
+    
+    var span = document.createElement('span');
+    mxUtils.write(span, mxResources.get('fitToSheetsAcross'));
+    td3.appendChild(span);
+
+    mxUtils.write(td4, mxResources.get('fitToBy'));
+    
+    var sheetsDownInput = sheetsAcrossInput.cloneNode(true);
+    td5.appendChild(sheetsDownInput);
+    
+    mxEvent.addListener(sheetsAcrossInput, 'focus', function()
+    {
+        fitRadio.checked = true;
+    });
+
+    mxEvent.addListener(sheetsDownInput, 'focus', function()
+    {
+        fitRadio.checked = true;
+    });
+
+    var span = document.createElement('span');
+    mxUtils.write(span, mxResources.get('fitToSheetsDown'));
+    td6.appendChild(span);
+    
+    row1.appendChild(td1);
+    row1.appendChild(td2);
+    row1.appendChild(td3);
+    
+    row2.appendChild(td4);
+    row2.appendChild(td5);
+    row2.appendChild(td6);
+    
+    tbody.appendChild(row1);
+    tbody.appendChild(row2);
+    table.appendChild(tbody);
+    fitSection.appendChild(table);
+    
+    div.appendChild(fitSection);
+    
+    // Page scale ...
+    var pageScaleSection = document.createElement('div');
+
+    var span = document.createElement('div');
+    span.style.fontWeight = 'bold';
+    span.style.marginBottom = '12px';
+	
+	//mxUtils.write(span, mxResources.get('paperSize'));
+	mxUtils.write(span, "Operators");
+	
+    pageScaleSection.appendChild(span);
+    
+    var span = document.createElement('div');
+    span.style.marginBottom = '12px';
+
+    var accessor = temporalOperatorDialog.addPageFormatPanel(span, 'printdialog',
+        editorUi.editor.graph.pageFormat || mxConstants.PAGE_FORMAT_A4_PORTRAIT);
+    pageScaleSection.appendChild(span);
+    
+    var span = document.createElement('span');
+    mxUtils.write(span, mxResources.get('pageScale'));
+    pageScaleSection.appendChild(span);
+    
+    var pageScaleInput = document.createElement('input');
+    pageScaleInput.style.cssText = 'margin:0 8px 0 8px;';
+    pageScaleInput.setAttribute('value', '100 %');
+    pageScaleInput.style.width = '60px';
+    pageScaleSection.appendChild(pageScaleInput);
+    
+    div.appendChild(pageScaleSection);
+    
+    // Buttons
+    var buttons = document.createElement('div');
+    buttons.style.cssText = 'text-align:right;margin:48px 0 0 0;';
+    
+    // Overall scale for print-out to account for print borders in dialogs etc
+    function preview(print)
+    {
+        var printScale = parseInt(pageScaleInput.value) / 100;
+        
+        if (isNaN(printScale))
+        {
+            printScale = 1;
+            pageScaleInput.value = '100 %';
+        }
+        
+        // Workaround to match available paper size in actual print output
+        printScale *= 0.75;
+        
+        // Disables dark mode while printing
+        var darkStylesheet = null;
+        
+        if (graph.themes != null && graph.defaultThemeName == 'darkTheme')
+        {
+            darkStylesheet = graph.stylesheet;
+            graph.stylesheet = graph.getDefaultStylesheet()
+            graph.refresh();
+        }
+        
+        function printGraph(thisGraph, pv, forcePageBreaks)
+        {
+            // Workaround for CSS transforms affecting the print output
+            // is to disable during print output and restore after
+            var prev = thisGraph.useCssTransforms;
+            var prevTranslate = thisGraph.currentTranslate;
+            var prevScale = thisGraph.currentScale;
+            var prevViewTranslate = thisGraph.view.translate;
+            var prevViewScale = thisGraph.view.scale;
+
+            if (thisGraph.useCssTransforms)
+            {
+                thisGraph.useCssTransforms = false;
+                thisGraph.currentTranslate = new mxPoint(0,0);
+                thisGraph.currentScale = 1;
+                thisGraph.view.translate = new mxPoint(0,0);
+                thisGraph.view.scale = 1;
+            }
+
+            // Negative coordinates are cropped or shifted if page visible
+            var gb = thisGraph.getGraphBounds();
+            var border = 0;
+            var x0 = 0;
+            var y0 = 0;
+    
+            var pf = accessor.get();
+            var scale = 1 / thisGraph.pageScale;
+            var autoOrigin = fitRadio.checked;
+    
+            if (autoOrigin)
+            {
+                var h = parseInt(sheetsAcrossInput.value);
+                var v = parseInt(sheetsDownInput.value);
+                
+                scale = Math.min((pf.height * v) / (gb.height / thisGraph.view.scale),
+                    (pf.width * h) / (gb.width / thisGraph.view.scale));
+            }
+            else
+            {
+                scale = parseInt(zoomInput.value) / (100 * thisGraph.pageScale);
+                
+                if (isNaN(scale))
+                {
+                    printScale = 1 / thisGraph.pageScale;
+                    zoomInput.value = '100 %';
+                }
+            }
+    
+            // Applies print scale
+            pf = mxRectangle.fromRectangle(pf);
+            pf.width = Math.ceil(pf.width * printScale);
+            pf.height = Math.ceil(pf.height * printScale);
+            scale *= printScale;
+            
+            // Starts at first visible page
+            if (!autoOrigin && thisGraph.pageVisible)
+            {
+                var layout = thisGraph.getPageLayout();
+                x0 -= layout.x * pf.width;
+                y0 -= layout.y * pf.height;
+            }
+            else
+            {
+                autoOrigin = true;
+            }
+            
+            if (pv == null)
+            {
+                pv = temporalOperatorDialog.createPrintPreview(thisGraph, scale, pf, border, x0, y0, autoOrigin);
+                pv.pageSelector = false;
+                pv.mathEnabled = false;
+                
+                var file = editorUi.getCurrentFile();
+                
+                if (file != null)
+                {
+                    pv.title = file.getTitle();
+                }
+                
+                var writeHead = pv.writeHead;
+                
+                // Overridden to add custom fonts
+                pv.writeHead = function(doc)
+                {
+                    writeHead.apply(this, arguments);
+                    
+                    // Fixes font weight for PDF export in Chrome
+                    if (mxClient.IS_GC)
+                    {
+                        doc.writeln('<style type="text/css">');
+                        doc.writeln('@media print {');
+                        doc.writeln('span.MathJax_SVG svg { shape-rendering: crispEdges; }');
+                        doc.writeln('}');
+                        doc.writeln('</style>');
+                    }
+
+                    if (editorUi.editor.fontCss != null)
+                    {
+                        doc.writeln('<style type="text/css">');
+                        doc.writeln(editorUi.editor.fontCss);
+                        doc.writeln('</style>');
+                    }
+                    
+                    if (thisGraph.extFonts != null)
+                    {
+                        for (var i = 0; i < thisGraph.extFonts.length; i++)
+                        {
+                            var fontName = thisGraph.extFonts[i].name;
+                            var fontUrl = thisGraph.extFonts[i].url;
+                            
+                            if (fontUrl.indexOf(Editor.GOOGLE_FONTS) == 0)
+                            {
+                                doc.writeln('<link rel="stylesheet" href="' + fontUrl + '" charset="UTF-8" type="text/css">');
+                            }
+                            else
+                            {
+                                doc.writeln('<style type="text/css">');
+                                doc.writeln('@font-face {\n' +
+                                        '\tfont-family: "'+ fontName +'";\n' + 
+                                        '\tsrc: url("'+ fontUrl +'");\n' + 
+                                        '}');
+                                doc.writeln('</style>');
+                            }
+                        }
+                    }
+                };
+                
+                if (typeof(MathJax) !== 'undefined')
+                {
+                    // Adds class to ignore if math is disabled
+                    var printPreviewRenderPage = pv.renderPage;
+                    
+                    pv.renderPage = function(w, h, dx, dy, content, pageNumber)
+                    {
+                        var prev = mxClient.NO_FO;
+                        mxClient.NO_FO = (this.graph.mathEnabled && !editorUi.editor.useForeignObjectForMath) ?
+                            true : editorUi.editor.originalNoForeignObject;
+                        
+                        var result = printPreviewRenderPage.apply(this, arguments);
+
+                        mxClient.NO_FO = prev;
+                        
+                        if (this.graph.mathEnabled)
+                        {
+                            this.mathEnabled = this.mathEnabled || true;
+                        }
+                        else
+                        {
+                            result.className = 'geDisableMathJax';
+                        }
+                        
+                        return result;
+                    };
+                }
+                
+                // Switches stylesheet for print output in dark mode
+                var temp = null;
+                
+                if (graph.themes != null && graph.defaultThemeName == 'darkTheme')
+                {
+                    temp = graph.stylesheet;
+                    graph.stylesheet = graph.getDefaultStylesheet()
+                    graph.refresh();
+                }
+                
+                // Generates the print output
+                pv.open(null, null, forcePageBreaks, true);
+                
+                // Restores the stylesheet
+                if (temp != null)
+                {
+                    graph.stylesheet = temp;
+                    graph.refresh();
+                }
+            }
+            else
+            {				
+                var bg = thisGraph.background;
+                
+                if (bg == null || bg == '' || bg == mxConstants.NONE)
+                {
+                    bg = '#ffffff';
+                }
+                
+                pv.backgroundColor = bg;
+                pv.autoOrigin = autoOrigin;
+                pv.appendGraph(thisGraph, scale, x0, y0, forcePageBreaks, true);
+                
+                if (thisGraph.extFonts != null && pv.wnd != null)
+                {
+                    for (var i = 0; i < thisGraph.extFonts.length; i++)
+                    {
+                        var fontName = thisGraph.extFonts[i].name;
+                        var fontUrl = thisGraph.extFonts[i].url;
+                        
+                        if (fontUrl.indexOf(Editor.GOOGLE_FONTS) == 0)
+                        {
+                            pv.wnd.document.writeln('<link rel="stylesheet" href="' + fontUrl + '" charset="UTF-8" type="text/css">');
+                        }
+                        else
+                        {
+                            pv.wnd.document.writeln('<style type="text/css">');
+                            pv.wnd.document.writeln('@font-face {\n' +
+                                    '\tfont-family: "'+ fontName +'";\n' + 
+                                    '\tsrc: url("'+ fontUrl +'");\n' + 
+                                    '}');
+                            pv.wnd.document.writeln('</style>');
+                        }
+                    }
+                }
+            }
+            
+            // Restores state if css transforms are used
+            if (prev)
+            {
+                thisGraph.useCssTransforms = prev;
+                thisGraph.currentTranslate = prevTranslate;
+                thisGraph.currentScale = prevScale;
+                thisGraph.view.translate = prevViewTranslate;
+                thisGraph.view.scale = prevViewScale;
+            }
+            
+            return pv;
+        };
+        
+        var pagesFrom = pagesFromInput.value;
+        var pagesTo = pagesToInput.value;
+        var ignorePages = !allPagesRadio.checked;
+        var pv = null;
+                    
+        if (ignorePages)
+        {
+            ignorePages = pagesFrom == currentPage && pagesTo == currentPage;
+        }
+        
+        if (!ignorePages && editorUi.pages != null && editorUi.pages.length)
+        {
+            var i0 = 0;
+            var imax = editorUi.pages.length - 1;
+            
+            if (!allPagesRadio.checked)
+            {
+                i0 = parseInt(pagesFrom) - 1;
+                imax = parseInt(pagesTo) - 1;
+            }
+            
+            for (var i = i0; i <= imax; i++)
+            {
+                var page = editorUi.pages[i];
+                var tempGraph = (page == editorUi.currentPage) ? graph : null;
+
+                if (tempGraph == null)
+                {
+                    tempGraph = editorUi.createTemporaryGraph(graph.stylesheet);//getStylesheet());
+
+                    // Restores graph settings that are relevant for printing
+                    var pageVisible = true;
+                    var mathEnabled = false;
+                    var bg = null;
+                    var bgImage = null;
+                    
+                    if (page.viewState == null)
+                    {
+                        // Workaround to extract view state from XML node
+                        // This changes the state of the page and parses
+                        // the XML for the graph model even if not needed.
+                        if (page.root == null)
+                        {
+                            editorUi.updatePageRoot(page);
+                        }
+                    }
+                    
+                    if (page.viewState != null)
+                    {
+                        pageVisible = page.viewState.pageVisible;
+                        mathEnabled = page.viewState.mathEnabled;
+                        bg = page.viewState.background;
+                        bgImage = page.viewState.backgroundImage;
+                        tempGraph.extFonts = page.viewState.extFonts;
+                    }
+                
+                    tempGraph.background = bg;
+                    tempGraph.backgroundImage = (bgImage != null) ? new mxImage(bgImage.src, bgImage.width, bgImage.height) : null;
+                    tempGraph.pageVisible = pageVisible;
+                    tempGraph.mathEnabled = mathEnabled;
+                    
+                    // Redirects placeholders to current page
+                    var graphGetGlobalVariable = tempGraph.getGlobalVariable;
+    
+                    tempGraph.getGlobalVariable = function(name)
+                    {
+                        if (name == 'page')
+                        {
+                            return page.getName();
+                        }
+                        else if (name == 'pagenumber')
+                        {
+                            return i + 1;
+                        }
+                        else if (name == 'pagecount')
+                        {
+                            return (editorUi.pages != null) ? editorUi.pages.length : 1;
+                        }
+                        
+                        return graphGetGlobalVariable.apply(this, arguments);
+                    };
+                    
+                    document.body.appendChild(tempGraph.container);
+                    editorUi.updatePageRoot(page);
+                    tempGraph.model.setRoot(page.root);
+                }
+                
+                pv = printGraph(tempGraph, pv, i != imax);
+
+                if (tempGraph != graph)
+                {
+                    tempGraph.container.parentNode.removeChild(tempGraph.container);
+                }
+            }
+        }
+        else
+        {
+            pv = printGraph(graph);
+        }
+        
+        if (pv == null)
+        {
+            editorUi.handleError({message: mxResources.get('errorUpdatingPreview')});
+        }
+        else
+        {
+            if (pv.mathEnabled)
+            {
+                var doc = pv.wnd.document;
+                
+                // Adds asynchronous printing when MathJax finishes rendering
+                // via global variable that is checked in math-print.js to
+                // avoid generating unsafe-inline script or adding SHA to CSP
+                if (print)
+                {
+                    pv.wnd.IMMEDIATE_PRINT = true;
+                }
+
+                doc.writeln('<script type="text/javascript" src="' + DRAWIO_BASE_URL + '/js/math-print.js"></script>');
+            }
+            
+            pv.closeDocument();
+            
+            if (!pv.mathEnabled && print)
+            {
+                temporalOperatorDialog.printPreview(pv);
+            }
+        }
+        
+        // Restores dark mode
+        if (darkStylesheet != null)
+        {
+            graph.stylesheet = darkStylesheet;
+            graph.refresh();
+        }
+    };
+    
+    var cancelBtn = mxUtils.button(mxResources.get('cancel'), function()
+    {
+        editorUi.hideDialog();
+    });
+    cancelBtn.className = 'geBtn';
+    
+    if (editorUi.editor.cancelFirst)
+    {
+        buttons.appendChild(cancelBtn);
+    }
+    
+    if (!editorUi.isOffline())
+    {
+        var helpBtn = mxUtils.button(mxResources.get('help'), function()
+        {
+            graph.openLink('https://desk.draw.io/support/solutions/articles/16000048947');
+        });
+        
+        helpBtn.className = 'geBtn';
+        buttons.appendChild(helpBtn);
+    }
+    
+    if (temporalOperatorDialog.previewEnabled)
+    {
+        var previewBtn = mxUtils.button(mxResources.get('preview'), function()
+        {
+            editorUi.hideDialog();
+            preview(false);
+        });
+        previewBtn.className = 'geBtn';
+        buttons.appendChild(previewBtn);
+    }
+    
+    var printBtn = mxUtils.button(mxResources.get((!temporalOperatorDialog.previewEnabled) ? 'ok' : 'print'), function()
+    {
+        editorUi.hideDialog();
+        preview(true);
+    });
+    printBtn.className = 'geBtn gePrimaryBtn';
+    buttons.appendChild(printBtn);
+    
+    if (!editorUi.editor.cancelFirst)
+    {
+        buttons.appendChild(cancelBtn);
+    }
+
+    div.appendChild(buttons);
+
+    this.container = div;
+};
+	
+
+/**
+ * Constructs a new print dialog.
+ */
+temporalOperatorDialog.printPreview = function(preview)
+{
+	try
+	{
+		if (preview.wnd != null)
+		{
+			var printFn = function()
+			{
+				preview.wnd.focus();
+				preview.wnd.print();
+				preview.wnd.close();
+			};
+			
+			// Workaround for Google Chrome which needs a bit of a
+			// delay in order to render the SVG contents
+			// Needs testing in production
+			if (mxClient.IS_GC)
+			{
+				window.setTimeout(printFn, 500);
+			}
+			else
+			{
+				printFn();
+			}
+		}
+	}
+	catch (e)
+	{
+		// ignores possible Access Denied
+	}
+};
+
+/**
+ * Constructs a new print dialog.
+ */
+temporalOperatorDialog.createPrintPreview = function(graph, scale, pf, border, x0, y0, autoOrigin)
+{
+	var preview = new mxPrintPreview(graph, scale, pf, border, x0, y0);
+	preview.title = mxResources.get('preview');
+	preview.printBackgroundImage = true;
+	preview.autoOrigin = autoOrigin;
+	var bg = graph.background;
+	
+	if (bg == null || bg == '' || bg == mxConstants.NONE)
+	{
+		bg = '#ffffff';
+	}
+	
+	preview.backgroundColor = bg;
+	
+	var writeHead = preview.writeHead;
+	
+	// Adds a border in the preview
+	preview.writeHead = function(doc)
+	{
+		writeHead.apply(this, arguments);
+		
+		doc.writeln('<style type="text/css">');
+		doc.writeln('@media screen {');
+		doc.writeln('  body > div { padding:30px;box-sizing:content-box; }');
+		doc.writeln('}');
+		doc.writeln('</style>');
+	};
+	
+	return preview;
+};
+
+/**
+ * Specifies if the preview button should be enabled. Default is true.
+ */
+temporalOperatorDialog.previewEnabled = true;
+
+temporalOperatorDialog.addPageFormatPanel = function(div, namePostfix, pageFormat, pageFormatListener)
+{
+	var formatName = 'format-' + namePostfix;
+	
+	var portraitCheckBox = document.createElement('input');
+	portraitCheckBox.setAttribute('name', formatName);
+	portraitCheckBox.setAttribute('type', 'radio');
+	portraitCheckBox.setAttribute('value', 'portrait');
+	
+	var landscapeCheckBox = document.createElement('input');
+	landscapeCheckBox.setAttribute('name', formatName);
+	landscapeCheckBox.setAttribute('type', 'radio');
+	landscapeCheckBox.setAttribute('value', 'landscape');
+	
+	var paperSizeSelect = document.createElement('select');
+	paperSizeSelect.style.marginBottom = '8px';
+	paperSizeSelect.style.width = '202px';
+
+	var formatDiv = document.createElement('div');
+	formatDiv.style.marginLeft = '4px';
+	formatDiv.style.width = '210px';
+	formatDiv.style.height = '24px';
+
+	portraitCheckBox.style.marginRight = '6px';
+	formatDiv.appendChild(portraitCheckBox);
+	
+	var portraitSpan = document.createElement('span');
+	portraitSpan.style.maxWidth = '100px';
+	mxUtils.write(portraitSpan, mxResources.get('portrait'));
+	formatDiv.appendChild(portraitSpan);
+
+	landscapeCheckBox.style.marginLeft = '10px';
+	landscapeCheckBox.style.marginRight = '6px';
+	formatDiv.appendChild(landscapeCheckBox);
+	
+	var landscapeSpan = document.createElement('span');
+	landscapeSpan.style.width = '100px';
+	mxUtils.write(landscapeSpan, mxResources.get('landscape'));
+	formatDiv.appendChild(landscapeSpan)
+
+	var customDiv = document.createElement('div');
+	customDiv.style.marginLeft = '4px';
+	customDiv.style.width = '210px';
+	customDiv.style.height = '24px';
+	
+	var widthInput = document.createElement('input');
+	widthInput.setAttribute('size', '7');
+	widthInput.style.textAlign = 'right';
+	customDiv.appendChild(widthInput);
+	mxUtils.write(customDiv, ' in x ');
+	
+	var heightInput = document.createElement('input');
+	heightInput.setAttribute('size', '7');
+	heightInput.style.textAlign = 'right';
+	customDiv.appendChild(heightInput);
+	mxUtils.write(customDiv, ' in');
+
+	//Time
+	var timeDiv = document.createElement('div');
+	timeDiv.style.marginLeft = '4px';
+	timeDiv.style.width = '310px';
+	timeDiv.style.height = '24px';
+	mxUtils.write(timeDiv, '<time >  : ');
+
+	//Time input
+	var timeInput = document.createElement('input');
+	timeInput.setAttribute('size', '7');
+	timeInput.style.textAlign = 'right';
+	timeDiv.appendChild(timeInput);
+	mxUtils.write(timeDiv, ' units: ');
+
+	//Time unit
+	var timeUnit = document.createElement('input');
+	timeUnit.setAttribute('size', '7');
+	timeUnit.style.textAlign = 'left';
+	timeDiv.appendChild(timeUnit);
+	mxUtils.write(timeDiv, '');
+
+	//Event
+	var eventDiv = document.createElement('div');
+	eventDiv.style.marginLeft = '4px';
+	eventDiv.style.width = '310px';
+	eventDiv.style.height = '24px';
+	mxUtils.write(eventDiv, '<event>: ');
+
+	//Event input
+	var eventInput = document.createElement('input');
+	eventInput.setAttribute('size', '26');
+	eventInput.style.textAlign = 'left';
+	eventDiv.appendChild(eventInput);
+
+	formatDiv.style.display = 'none';
+	customDiv.style.display = 'none';
+	
+	var pf = new Object();
+	var formats = temporalOperatorDialog.getFormats();
+	
+	for (var i = 0; i < formats.length; i++)
+	{
+		var f = formats[i];
+		pf[f.key] = f;
+
+		var paperSizeOption = document.createElement('option');
+		paperSizeOption.setAttribute('value', f.key);
+		mxUtils.write(paperSizeOption, f.title);
+		paperSizeSelect.appendChild(paperSizeOption);
+	}
+	
+	var customSize = false;
+	
+	function listener(sender, evt, force)
+	{
+		if (force || (widthInput != document.activeElement && heightInput != document.activeElement))
+		{
+			var detected = false;
+			
+			for (var i = 0; i < formats.length; i++)
+			{
+				var f = formats[i];
+	
+				// Special case where custom was chosen
+				if (customSize)
+				{
+					if (f.key == 'custom')
+					{
+						paperSizeSelect.value = f.key;
+						customSize = false;
+					}
+				}
+				else if (f.format != null)
+				{
+					// Fixes wrong values for previous A4 and A5 page sizes
+					if (f.key == 'a4')
+					{
+						if (pageFormat.width == 826)
+						{
+							pageFormat = mxRectangle.fromRectangle(pageFormat);
+							pageFormat.width = 827;
+						}
+						else if (pageFormat.height == 826)
+						{
+							pageFormat = mxRectangle.fromRectangle(pageFormat);
+							pageFormat.height = 827;
+						}
+					}
+					else if (f.key == 'a5')
+					{
+						if (pageFormat.width == 584)
+						{
+							pageFormat = mxRectangle.fromRectangle(pageFormat);
+							pageFormat.width = 583;
+						}
+						else if (pageFormat.height == 584)
+						{
+							pageFormat = mxRectangle.fromRectangle(pageFormat);
+							pageFormat.height = 583;
+						}
+					}
+					
+					if (pageFormat.width == f.format.width && pageFormat.height == f.format.height)
+					{
+						paperSizeSelect.value = f.key;
+						portraitCheckBox.setAttribute('checked', 'checked');
+						portraitCheckBox.defaultChecked = true;
+						portraitCheckBox.checked = true;
+						landscapeCheckBox.removeAttribute('checked');
+						landscapeCheckBox.defaultChecked = false;
+						landscapeCheckBox.checked = false;
+						detected = true;
+					}
+					else if (pageFormat.width == f.format.height && pageFormat.height == f.format.width)
+					{
+						paperSizeSelect.value = f.key;
+						portraitCheckBox.removeAttribute('checked');
+						portraitCheckBox.defaultChecked = false;
+						portraitCheckBox.checked = false;
+						landscapeCheckBox.setAttribute('checked', 'checked');
+						landscapeCheckBox.defaultChecked = true;
+						landscapeCheckBox.checked = true;
+						detected = true;
+					}
+				}
+			}
+			
+			// Selects custom format which is last in list
+			if (!detected)
+			{
+				widthInput.value = pageFormat.width / 100;
+				heightInput.value = pageFormat.height / 100;
+				portraitCheckBox.setAttribute('checked', 'checked');
+				paperSizeSelect.value = 'custom';
+				formatDiv.style.display = 'none';
+				customDiv.style.display = '';
+			}
+			else
+			{
+				formatDiv.style.display = '';
+				customDiv.style.display = 'none';
+			}
+		}
+	};
+	
+	listener();
+
+	div.appendChild(timeDiv);
+	mxUtils.br(timeDiv);
+	div.appendChild(eventDiv);
+	mxUtils.br(div);
+	div.appendChild(paperSizeSelect);
+	mxUtils.br(div);
+
+
+	div.appendChild(formatDiv);
+	div.appendChild(customDiv);
+	
+	var currentPageFormat = pageFormat;
+	
+	var update = function(evt, selectChanged)
+	{
+		var f = pf[paperSizeSelect.value];
+		
+		if (f.format != null)
+		{
+			widthInput.value = f.format.width / 100;
+			heightInput.value = f.format.height / 100;
+			customDiv.style.display = 'none';
+			formatDiv.style.display = '';
+		}
+		else
+		{
+			formatDiv.style.display = 'none';
+			customDiv.style.display = '';
+		}
+		
+		var wi = parseFloat(widthInput.value);
+		
+		if (isNaN(wi) || wi <= 0)
+		{
+			widthInput.value = pageFormat.width / 100;
+		}
+		
+		var hi = parseFloat(heightInput.value);
+		
+		if (isNaN(hi) || hi <= 0)
+		{
+			heightInput.value = pageFormat.height / 100;
+		}
+		
+		var newPageFormat = new mxRectangle(0, 0,
+			Math.floor(parseFloat(widthInput.value) * 100),
+			Math.floor(parseFloat(heightInput.value) * 100));
+		
+		if (paperSizeSelect.value != 'custom' && landscapeCheckBox.checked)
+		{
+			newPageFormat = new mxRectangle(0, 0, newPageFormat.height, newPageFormat.width);
+		}
+		
+		// Initial select of custom should not update page format to avoid update of combo
+		if ((!selectChanged || !customSize) && (newPageFormat.width != currentPageFormat.width ||
+			newPageFormat.height != currentPageFormat.height))
+		{
+			currentPageFormat = newPageFormat;
+			
+			// Updates page format and reloads format panel
+			if (pageFormatListener != null)
+			{
+				pageFormatListener(currentPageFormat);
+			}
+		}
+	};
+
+	mxEvent.addListener(portraitSpan, 'click', function(evt)
+	{
+		portraitCheckBox.checked = true;
+		update(evt);
+		mxEvent.consume(evt);
+	});
+	
+	mxEvent.addListener(landscapeSpan, 'click', function(evt)
+	{
+		landscapeCheckBox.checked = true;
+		update(evt);
+		mxEvent.consume(evt);
+	});
+	
+	mxEvent.addListener(widthInput, 'blur', update);
+	mxEvent.addListener(widthInput, 'click', update);
+	mxEvent.addListener(heightInput, 'blur', update);
+	mxEvent.addListener(heightInput, 'click', update);
+	mxEvent.addListener(landscapeCheckBox, 'change', update);
+	mxEvent.addListener(portraitCheckBox, 'change', update);
+	mxEvent.addListener(paperSizeSelect, 'change', function(evt)
+	{
+		// Handles special case where custom was chosen
+		customSize = paperSizeSelect.value == 'custom';
+		update(evt, true);
+	});
+	
+	update();
+	
+	return {set: function(value)
+	{
+		pageFormat = value;
+		listener(null, null, true);
+	},get: function()
+	{
+		return currentPageFormat;
+	}, widthInput: widthInput,
+	heightInput: heightInput};
+};
+
+
+temporalOperatorDialog.getFormats = function()
+{
+	return [{key: 'Around', title: 'Around', format: null},
+	        {key: 'At', title: 'At', format: new mxRectangle(0, 0, 700, 1000)},
+	        {key: 'On', title: 'On', format: new mxRectangle(0, 0, 3300, 4681)},
+	        {key: 'Eventually', title: 'Eventually', format: new mxRectangle(0, 0, 2339, 3300)},
+	        {key: 'Until', title: 'Until', format: new mxRectangle(0, 0, 1654, 2336)},
+	        {key: 'Before', title: 'Before', format: new mxRectangle(0, 0, 1169, 1654)},
+	        {key: 'In', title: 'In', format: mxConstants.PAGE_FORMAT_A4_PORTRAIT},
+	        {key: 'AsCloseToAsPossible', title: 'As close to <?>  As  possible', format: new mxRectangle(0, 0, 583, 827)},
+	        {key: 'AsEarlyAsPossibleTo', title: 'As early as possible to <?>', format: new mxRectangle(0, 0, 413, 583)},
+	        {key: 'AsLateAsPossibleTo', title: 'As late as possible to <?>', format: new mxRectangle(0, 0, 291, 413)},
+	        {key: 'custom', title: mxResources.get('custom'), format: null}];
+};
+
+
+
+/**
+ * 
+ * 
+ * 	        {key: 'b4', title: 'B4 (250 mm x 353 mm)', format: new mxRectangle(0, 0, 980, 1390)},
+	        {key: 'b5', title: 'B5 (176 mm x 250 mm)', format: new mxRectangle(0, 0, 690, 980)},
+	        {key: '16-9', title: '16:9 (1600 x 900)', format: new mxRectangle(0, 0, 1600, 900)},
+	        {key: '16-10', title: '16:10 (1920 x 1200)', format: new mxRectangle(0, 0, 1920, 1200)},
+	        {key: '4-3', title: '4:3 (1600 x 1200)', format: new mxRectangle(0, 0, 1600, 1200)},
+ */

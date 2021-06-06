@@ -559,9 +559,13 @@ Format.prototype.refresh = function()
 		architecturePanel.style.display = 'none';
 
 		var uncertaintyPanel = div.cloneNode(false);
+		uncertaintyPanel.id = "uncertaintyPanel";
 		var riskPanel = uncertaintyPanel.cloneNode(false);
+		riskPanel.id = "riskPanel";
 		var mitigationPanel = riskPanel.cloneNode(false);
+		mitigationPanel.id = "mitigationPanel";
 		var outcomePanel = mitigationPanel.cloneNode(false);
+		outcomePanel.id = "outcomePanel";
 
 		architecturePanel.appendChild(divArch);
 
@@ -615,90 +619,165 @@ Format.prototype.refresh = function()
 		{
 			var cells = graph.getSelectionCells();
 
+			var value = graph.getModel().getValue(cells[0]);
+
+			if (!mxUtils.isNode(value))
+			{
+				var doc = mxUtils.createXmlDocument();
+				var obj = doc.createElement('object');
+				obj.setAttribute('label', value || '');
+				value = obj;
+			}
+
+			//Create the uncertainty data object
+
 			uncertaintyPanel.innerHTML = '';
+			var uncertaintyData = {};
+			var uncertaintyDB = {};
 
-			//System
-			var labelOptionLabel = "System";
-			var system_description = "Flood monitoring systems (FMS) deploy in diverse but often harsh environments that expose them to various challenges making them vulnerable to uncertainty. Therefore, the software and hardware infrastructure of FMS needs to handle such environments and the associated uncertainties. Uncertainty can influence not only the hardware and software aspect of FMS, but also such aspects as the budget and project management and more.";
+			if(!value.hasAttribute("uncertaintyData")) {
+				uncertaintyData.system = "Flood monitoring systems (FMS) deploy in diverse but often harsh environments that expose them to various challenges making them vulnerable to uncertainty. Therefore, the software and hardware infrastructure of FMS needs to handle such environments and the associated uncertainties. Uncertainty can influence not only the hardware and software aspect of FMS, but also such aspects as the budget and project management and more.";
+				uncertaintyData.manifestation = "Network traffic loss";
+				uncertaintyData.environmentMonitor = "Operating environment monitoring properties: sensors, network-bandwidth, network connectivity, water-level meter and others.";
+				uncertaintyData.nature = {options: ['Aleatory', 'Epistemic'], value: ""};
+				uncertaintyData.perspective = {options: ["Subjective", "Objective"], value: ""};
+				uncertaintyData.source = {options: ["External", "Internal"], value: ""};
+				uncertaintyData.viewpoint = {options: ["Logical", "Physical", "Process"], value: ""};
+				uncertaintyData.description = "Network connectivity may fail";				
+				uncertaintyData.evidence = "Ping reply";
+				uncertaintyData.SourceDescription = "Operational environment";
+				uncertaintyData.relatedUncertainties = {};
+				uncertaintyData.location = "Network component such as a router";
+				uncertaintyData.level = {options: ["Known Unknown", "Unknown unknown", "Statistical"], value: ""};
+				uncertaintyData.awareness = {options: ["Known Unknown", "Unknown unknown"], value: ""};
+				uncertaintyData.emergingTime = {options: ["Requirement", "Development", "Runtime"], value: ""};
+				uncertaintyData.lifetime = "Uncertainty from failure exists throughout the lifetime of the system";
+				uncertaintyData.pattern = {options: ["Periodic", "Persistence ", "Transient", "Sporadic"], value: ""};
+				uncertaintyData.measure = {options: ["Probability", "Persistence ", "Fuzziness", "Temporal logic", "Non-specificity"], value: ""};
+				uncertaintyData.related = "Communication infrastructure components";
+				uncertaintyData.operator = {options: ["Modal", "Temporal", "Ordinal"], value: "Modal"};
+				uncertaintyData.modal = {options: ["MAY", "SHALL"], value: ""};
+				uncertaintyData.ordinal = {options: ["AS CLOSE AS POSSIBLE TO '?'", "AS MANY POSSIBLE TO '?'", "AS FEW AS POSSIBLE TO '?'"], value: ""};
+				uncertaintyData.temporal = {options: ["EVENTUALLY","UNTIL","BEFORE","AFTER","AS EARLY AS POSSIBLE","AS LATE AS POSSIBLE","AS CLOSE AS POSSIBLE TO '?'"], value: ""};
 
-			help_text_tag_with_default(ui, labelOptionLabel, uncertaintyPanel, system_description);
+				//Save the uncertainty data into the cell - single first selected cell
+				value.setAttribute("uncertaintyData", JSON.stringify(uncertaintyData));
+				var keyDB = "un1";
+				uncertaintyDB[keyDB] = uncertaintyData;
+				value.setAttribute("uncertaintyDB", JSON.stringify(uncertaintyDB));
+				
+				//uncertaintybase = {1:uncertainty1, 2:uncertainty2, ..., n:uncertaintyn}
+				//value.settribute("uncertaintyDate", JSON.stringfy(uncertaintyData));
+				graph.getModel().setValue(cells[0], value);
 
-			//Sub-system
-			var labelOptionLabel = "Sub-system";
-			var system_description = "Network, sensors, data storage, monitors and others";
-			help_text_tag_with_default(ui, labelOptionLabel, uncertaintyPanel, system_description);
+			}else if(mxUtils.isNode(value)){
 
-			//Environment
-			var labelOptionLabel = "Environment";
-			var system_description = "Operating, development, legal, marine etc.";
-			help_text_tag_with_default(ui, labelOptionLabel, uncertaintyPanel, system_description);
+				uncertaintyData = JSON.parse(value.getAttribute("uncertaintyData"));
+				uncertaintyDB = JSON.parse(value.getAttribute("uncertaintyDB"));
+				console.log(Object.keys(uncertaintyDB));
+			}
 
-			//Environment monitoring properties
-			var labelOptionLabel = "Environment monitoring property";
-			var system_description = "Operating environment monitoring properties: sensors, network-bandwidth, network connectivity, water-level meter and others.";
-			help_text_tag_with_default(ui, labelOptionLabel, uncertaintyPanel, system_description);
-
-			//Uncertainty nature
-			var optionsArray = ['Aleatory', 'Epistemic', 'Other'];
-			var labelOptionLabel = "Nature";
-			help_select_tag_with_option(labelOptionLabel, uncertaintyPanel, optionsArray);
-
-			//Perspective
-			optionsArray = ["Subjective", "Objective"];
-			labelOptionLabel = "Perspective";
-			help_select_tag_with_option(labelOptionLabel, uncertaintyPanel, optionsArray);
-
-			//Source
-			optionsArray = ["External", "Internal"];
-			labelOptionLabel = "Source";
-			help_select_tag_with_option(labelOptionLabel, uncertaintyPanel, optionsArray);			
-
-			//Sub source
-			var labelOptionLabel = "Sub-source";
-			var system_description = "Interference with the network routers from the environment";
-
-			help_text_tag_with_default(ui, labelOptionLabel, uncertaintyPanel, system_description);
+			//Uncertainty descriptive attributes
 
 			//Uncertainty description
-			var labelOptionLabel = "Uncertainty description";
-			var system_description = "Network connectivity may fail";
+			var labelOptionLabel = "description";
+			help_text_tag_with_default(ui, labelOptionLabel, uncertaintyPanel, uncertaintyData.description);
 
-			help_text_tag_with_default(ui, labelOptionLabel, uncertaintyPanel, system_description);
+			//Uncertainty nature
+			var labelOptionLabel = "nature";
+			help_select_tag_with_option(ui, labelOptionLabel, uncertaintyPanel, uncertaintyData.nature.options, uncertaintyData.nature.value);
 
+			//Operators
+			labelOptionLabel = "operator";
+			help_select_tag_with_option(ui, labelOptionLabel, uncertaintyPanel, uncertaintyData.operator.options, uncertaintyData.operator.value, true, "operator", "suboperator");
+
+			labelOptionLabel = uncertaintyData.operator.value.toLowerCase();//"temporal";
+			help_select_tag_with_option(ui, labelOptionLabel, uncertaintyPanel, uncertaintyData[labelOptionLabel].options, uncertaintyData[labelOptionLabel].value, false, "suboperator");
+
+			//Perspective
+			labelOptionLabel = "perspective";
+			help_select_tag_with_option(ui, labelOptionLabel, uncertaintyPanel, uncertaintyData.perspective.options, uncertaintyData.perspective.value);
+
+			//Awareness
+			labelOptionLabel = "awareness";
+			help_select_tag_with_option(ui, labelOptionLabel, uncertaintyPanel, uncertaintyData.awareness.options, uncertaintyData.awareness.value);
+
+
+			//Level
+			labelOptionLabel = "level";
+			help_select_tag_with_option(ui, labelOptionLabel, uncertaintyPanel, uncertaintyData.level.options, uncertaintyData.level.value);
+
+
+			// Uncertainty source attributes
+
+			//Source
+			labelOptionLabel = "source";
+			help_select_tag_with_option(ui, labelOptionLabel, uncertaintyPanel, uncertaintyData.source.options, uncertaintyData.source.value);
+			
+			//Uncertainty description
+			var labelOptionLabel = "SourceDescription";
+			help_text_tag_with_default(ui, labelOptionLabel, uncertaintyPanel, uncertaintyData.SourceDescription);		
+
+			//Sub source
+			//var labelOptionLabel = "Sub-source";
+			//var system_description = "Interference with the network routers from the environment";
+			//help_text_tag_with_default(ui, labelOptionLabel, uncertaintyPanel, system_description);
+
+			//Uncertainty system attributes
+
+			//System
+			var labelOptionLabel = "system";
+			help_text_tag_with_default(ui, labelOptionLabel, uncertaintyPanel, uncertaintyData.system);
+			//Sub-system
+			//var labelOptionLabel = "Sub-system";
+			//var system_description = "Network, sensors, data storage, monitors and others";
+			//help_text_tag_with_default(ui, labelOptionLabel, uncertaintyPanel, system_description);
+
+
+			//viewpoint
+			labelOptionLabel = "viewpoint";
+			help_select_tag_with_option(ui, labelOptionLabel, uncertaintyPanel, uncertaintyData.viewpoint.options, uncertaintyData.viewpoint.value);
+			
+			//Deminsion [location, level, emerging time, life-time, pattern, measure]
+			var labelOptionLabel = "location";
+			help_text_tag_with_default(ui, labelOptionLabel, uncertaintyPanel, uncertaintyData.location);
+			
+			
+			//Uncertaity manifestation attributes
+			//Environment
+			var labelOptionLabel = "manifestation";
+			help_text_tag_with_default(ui, labelOptionLabel, uncertaintyPanel, uncertaintyData.manifestation);
+
+			labelOptionLabel = "measure";
+			help_select_tag_with_option(ui, labelOptionLabel, uncertaintyPanel, uncertaintyData.measure.options, uncertaintyData.measure.value);
+
+			//Environment monitoring properties
+			var labelOptionLabel = "environmentMonitor";
+			help_text_tag_with_default(ui, labelOptionLabel, uncertaintyPanel, uncertaintyData.environmentMonitor);
+
+			//Evidence
+			var labelOptionLabel = "evidence";
+			help_text_tag_with_default(ui, labelOptionLabel, uncertaintyPanel, uncertaintyData.evidence);		
+			
+			//Emerging time
+			labelOptionLabel = "emergingTime";
+			help_select_tag_with_option(ui, labelOptionLabel, uncertaintyPanel, uncertaintyData.emergingTime.options, uncertaintyData.emergingTime.value);
+
+			//Life time
+			var labelOptionLabel = "lifetime";
+			help_text_tag_with_default(ui, labelOptionLabel, uncertaintyPanel, uncertaintyData.lifetime);
+
+			labelOptionLabel = "pattern";
+			help_select_tag_with_option(ui, labelOptionLabel, uncertaintyPanel, uncertaintyData.pattern.options, uncertaintyData.pattern.value);
+
+			//var labelOptionLabel = "Indicator";
+			//var system_description = "downtime";
+			//help_text_tag_with_default(ui, labelOptionLabel, uncertaintyPanel, system_description);
+
+			//Mapping
 			//Related uncertainties
-			var labelOptionLabel = "Related uncertainty";
-			var system_description = "Network connectivity may fail";
-
-			help_text_tag_with_default(ui, labelOptionLabel, uncertaintyPanel, system_description);
-			
-			//Deminsion [location, level, emerging time, life-time, pattern, measure, indicator]
-			var labelOptionLabel = "Location";
-			var system_description = "Network component such as a router";
-			help_text_tag_with_default(ui, labelOptionLabel, uncertaintyPanel, system_description);
-			
-			optionsArray = ["Known Unknown", "Unknown unknown", "Statistical"];
-			labelOptionLabel = "Level";
-			help_select_tag_with_option(labelOptionLabel, uncertaintyPanel, optionsArray);
-
-			optionsArray = ["Requirement", "Development", "Runtime"];
-			labelOptionLabel = "Emerging Time";
-			help_select_tag_with_option(labelOptionLabel, uncertaintyPanel, optionsArray);
-
-			var labelOptionLabel = "Life time";
-			var system_description = "Uncertainty from failure exists throughout the lifetime of the system";
-			help_text_tag_with_default(ui, labelOptionLabel, uncertaintyPanel, system_description);
-
-			optionsArray = ["Periodic", "Persistence ", "Transient", "Sporadic"];
-			labelOptionLabel = "Pattern";
-			help_select_tag_with_option(labelOptionLabel, uncertaintyPanel, optionsArray);
-
-			optionsArray = ["Probability", "Persistence ", "Fuzziness", "Temporal logic", "Non-specificity"];
-			labelOptionLabel = "Measure";
-			help_select_tag_with_option(labelOptionLabel, uncertaintyPanel, optionsArray);
-
-			var labelOptionLabel = "Indicator";
-			var system_description = "Downtime";
-			help_text_tag_with_default(ui, labelOptionLabel, uncertaintyPanel, system_description);
+			var labelOptionLabel = "related";
+			help_text_tag_with_default(ui, labelOptionLabel, uncertaintyPanel, uncertaintyData.related);
 		});
 
 		// Uncertainty - risk
@@ -710,7 +789,17 @@ Format.prototype.refresh = function()
 			//Futures
 			optionsArray = ["Possible", "Plausible", "Probable", "Desirable"];
 			labelOptionLabel = "Futures";
-			help_select_tag_with_option(labelOptionLabel, riskPanel, optionsArray);
+			help_select_tag_with_option(ui, labelOptionLabel, riskPanel, optionsArray);
+
+			//Level
+			optionsArray = ["High", "Medium", "Low"];
+			labelOptionLabel = "Level";
+			help_select_tag_with_option(ui, labelOptionLabel, riskPanel, optionsArray);
+
+			var labelOptionLabel = "Details";
+			var system_description = "Data loss, flooding warning failure";
+			help_text_tag_with_default(ui, labelOptionLabel, riskPanel, system_description);
+
 		});
 
 		// Uncertainty - Mitigation
@@ -722,7 +811,11 @@ Format.prototype.refresh = function()
 			//Futures
 			optionsArray = ["Possible", "Plausible", "Probable", "Desirable"];
 			labelOptionLabel = "Futures";
-			help_select_tag_with_option(labelOptionLabel, mitigationPanel, optionsArray);
+			help_select_tag_with_option(ui, labelOptionLabel, mitigationPanel, optionsArray);
+
+			var labelOptionLabel = "Details";
+			var system_description = "Data loss, flooding warning failure";
+			help_text_tag_with_default(ui, labelOptionLabel, mitigationPanel, system_description);
 
 		});
 
@@ -736,7 +829,11 @@ Format.prototype.refresh = function()
 			//Futures
 			optionsArray = ["Possible", "Plausible", "Probable", "Desirable"];
 			labelOptionLabel = "Futures";
-			help_select_tag_with_option(labelOptionLabel, outcomePanel, optionsArray);
+			help_select_tag_with_option(ui, labelOptionLabel, outcomePanel, optionsArray);
+
+			var labelOptionLabel = "Details";
+			var system_description = "Data loss, flooding warning failure";
+			help_text_tag_with_default(ui, labelOptionLabel, outcomePanel, system_description);
 
 			cells.forEach(element => {
 				let idDiv = document.createElement('div');
@@ -6268,7 +6365,9 @@ OutcomeFormatPanel.prototype.init = function()
 	//this.addFont(this.container);
 };
 
-function help_select_tag_with_option(labelOptionLabelValue, archPanel, dirs) {
+function help_select_tag_with_option(ui, labelOptionLabelValue, archPanel, dirs, SelectedValue, suboptions=false, thisID, targetID) {
+
+	console.log("help_select_tag_with_option");
 
 	//Label container
 	var labelOptionLabel = document.createElement('div');
@@ -6289,6 +6388,7 @@ function help_select_tag_with_option(labelOptionLabelValue, archPanel, dirs) {
 	var labForOptionValue = document.createElement('span');
 	labForOptionValue.className = 'geFormatSection';
 	labForOptionValue.style.padding = '0px 0px 0px 0px';
+	labForOptionValue.id = thisID + "label";
 	labForOptionValue.style.width = '85px';
 	labForOptionValue.innerHTML = labelOptionLabelValue;
 	labForOptionValue.setAttribute('title',labelOptionLabelValue);
@@ -6301,25 +6401,46 @@ function help_select_tag_with_option(labelOptionLabelValue, archPanel, dirs) {
 
 	//Drop dato options
 	var dirSelect = document.createElement('select');
+	dirSelect.id = thisID + "Select";
 	dirSelect.style.position = 'absolute';
 	dirSelect.style.right = '20px';
 	dirSelect.style.width = '97px';
 	dirSelect.style.marginTop = '-2px';
 	dirSelect.style.float ='left';
+	dirSelect.style.fontSize = 'inherit';
+	dirSelect.style.fontFamily = 'Helvetica,Arial,sans-serif';
+
+	var dirOption = document.createElement('option');
+	dirOption.setAttribute('value', "");
+	mxUtils.write(dirOption, "");
+	dirSelect.appendChild(dirOption);
 
 	for (var i = 0; i < dirs.length; i++) {
-		var dirOption = document.createElement('option');
+		dirOption = document.createElement('option');
 		dirOption.setAttribute('value', dirs[i]);
 		mxUtils.write(dirOption, dirs[i]);
 		dirSelect.appendChild(dirOption);
 	}
+	dirSelect.value = SelectedValue;
 
 	labelOptionLabel.appendChild(labForOptionValue);
 	labelOptionLabel.appendChild(dirSelect);
 	archPanel.appendChild(labelOptionLabel);
+
+	mxEvent.addListener(dirSelect, 'change', function()
+	{
+		if(suboptions){
+			ui.actions.get('changeArchSelectOption').funct(labelOptionLabelValue, dirSelect, true, targetID);
+		}else{
+			ui.actions.get('changeArchSelectOption').funct(labelOptionLabelValue, dirSelect, false);
+		}
+	});
 }
 
+
 function help_text_tag_with_default(ui, labelOptionLabelValue, archPanel, textValue) {
+
+	console.log("help_text_tag_with_default");
 
 	//Attribute container
 	var labelOptionLabel = document.createElement('div');
@@ -6357,12 +6478,20 @@ function help_text_tag_with_default(ui, labelOptionLabelValue, archPanel, textVa
 	var archAttriTextNode = document.createTextNode(textValue);
 	archAttriTextNodeContainer.appendChild(archAttriTextNode);
 	
+	//Define tooltip
 	archAttriTextNodeContainer.setAttribute('title', (labelOptionLabelValue + ":\n" + archAttriTextNode.data));
 
 	mxEvent.addListener(archAttriTextNodeContainer, 'click', function()
 	{
 		ui.actions.get('editArch').funct(archAttriTextNode, labelOptionLabelValue, archAttriTextNodeContainer);
 	});
+
+	mxEvent.addListener(archAttriTextNodeContainer, 'change', function()
+	{
+		console.log("Text Change in " + labelOptionLabelValue + " -- " + archAttriTextNodeContainer.innerHTML);
+		//ui.actions.get('editArch').funct(archAttriTextNode, labelOptionLabelValue, archAttriTextNodeContainer);
+	});
+
 
 	labelOptionLabel.appendChild(labForOptionValue);
 	labelOptionLabel.appendChild(archAttriTextNodeContainer);
