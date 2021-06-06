@@ -1155,10 +1155,29 @@ Actions.prototype.init = function()
 						value = obj;
 					}
 
-					if(value.hasAttribute("uncertaintyData")) {
-						uncertaintyData = JSON.parse(value.getAttribute("uncertaintyData"));
+					if(value.hasAttribute("uncertaintyDB")) {
+						//Save uncertainty data
+						/*
+						Get the current record from the database
+						Update its selected attribute
+						Then update back to the database
+						uncertaintyDB[keyDB] = uncertaintyData;
+						value.setAttribute("uncertaintyDB", JSON.stringify(uncertaintyDB));
+
+						*/
+						uncertaintyDB = JSON.parse(value.getAttribute("uncertaintyDB"));
+
+						DBkys = Object.keys(uncertaintyDB);
+						keyDB = DBkys[0];
+
+
+						uncertaintyData = uncertaintyDB[keyDB]//JSON.parse(value.getAttribute("uncertaintyData"));
 						uncertaintyData[archAttrilabel] = textValue.data;
-						value.setAttribute("uncertaintyData", JSON.stringify(uncertaintyData));			
+
+						uncertaintyDB[keyDB] = uncertaintyData //update DB record
+
+						//value.setAttribute("uncertaintyData", JSON.stringify(uncertaintyData));	update uncertainty DB
+						value.setAttribute("uncertaintyDB", JSON.stringify(uncertaintyDB));		
 						graph.getModel().setValue(cells[0], value);
 					}
 
@@ -1189,11 +1208,34 @@ Actions.prototype.init = function()
 				value = obj;
 			}
 
-			if(value.hasAttribute("uncertaintyData")) {
-				uncertaintyData = JSON.parse(value.getAttribute("uncertaintyData"));
+			if(value.hasAttribute("uncertaintyDB")) {
+				/*
+				Get the database uncertaintyDB
+				select the current record into uncertaintyData
+				update the current record
+				update the DB record
+				update the data
+				*/
+
+				uncertaintyDB = JSON.parse(value.getAttribute("uncertaintyDB"));
+
+				DBkys = Object.keys(uncertaintyDB);
+				keyDB = DBkys[0];
+
+				uncertaintyData = uncertaintyDB[keyDB]//JSON.parse(value.getAttribute("uncertaintyData"));
 				uncertaintyData[labelOptionLabelValue].value = dirSelect.value;
-				value.setAttribute("uncertaintyData", JSON.stringify(uncertaintyData));			
+
+				uncertaintyDB[keyDB] = uncertaintyData //update DB record
+
+				//value.setAttribute("uncertaintyData", JSON.stringify(uncertaintyData));	update uncertainty DB
+				value.setAttribute("uncertaintyDB", JSON.stringify(uncertaintyDB));		
 				graph.getModel().setValue(cells[0], value);
+
+
+				//uncertaintyData = JSON.parse(value.getAttribute("uncertaintyData"));
+				//uncertaintyData[labelOptionLabelValue].value = dirSelect.value;
+				//value.setAttribute("uncertaintyData", JSON.stringify(uncertaintyData));			
+				//graph.getModel().setValue(cells[0], value);
 			}
 
 			if(suboptions && dirSelect.value.toLowerCase()) {

@@ -634,8 +634,11 @@ Format.prototype.refresh = function()
 			uncertaintyPanel.innerHTML = '';
 			var uncertaintyData = {};
 			var uncertaintyDB = {};
+			var keyDB = "un1";
 
-			if(!value.hasAttribute("uncertaintyData")) {
+			if(!value.hasAttribute("uncertaintyDB")) {
+
+				
 				uncertaintyData.system = "Flood monitoring systems (FMS) deploy in diverse but often harsh environments that expose them to various challenges making them vulnerable to uncertainty. Therefore, the software and hardware infrastructure of FMS needs to handle such environments and the associated uncertainties. Uncertainty can influence not only the hardware and software aspect of FMS, but also such aspects as the budget and project management and more.";
 				uncertaintyData.manifestation = "Network traffic loss";
 				uncertaintyData.environmentMonitor = "Operating environment monitoring properties: sensors, network-bandwidth, network connectivity, water-level meter and others.";
@@ -661,8 +664,7 @@ Format.prototype.refresh = function()
 				uncertaintyData.temporal = {options: ["EVENTUALLY","UNTIL","BEFORE","AFTER","AS EARLY AS POSSIBLE","AS LATE AS POSSIBLE","AS CLOSE AS POSSIBLE TO '?'"], value: ""};
 
 				//Save the uncertainty data into the cell - single first selected cell
-				value.setAttribute("uncertaintyData", JSON.stringify(uncertaintyData));
-				var keyDB = "un1";
+				//value.setAttribute("uncertaintyData", JSON.stringify(uncertaintyData));
 				uncertaintyDB[keyDB] = uncertaintyData;
 				value.setAttribute("uncertaintyDB", JSON.stringify(uncertaintyDB));
 				
@@ -672,9 +674,16 @@ Format.prototype.refresh = function()
 
 			}else if(mxUtils.isNode(value)){
 
-				uncertaintyData = JSON.parse(value.getAttribute("uncertaintyData"));
+				//uncertaintyData = JSON.parse(value.getAttribute("uncertaintyData"));
 				uncertaintyDB = JSON.parse(value.getAttribute("uncertaintyDB"));
-				console.log(Object.keys(uncertaintyDB));
+
+				
+				DBkys = Object.keys(uncertaintyDB);
+				keyDB = DBkys[0];
+
+
+				uncertaintyData = uncertaintyDB[keyDB];
+				//console.log(Object.keys(uncertaintyDB));
 			}
 
 			//Uncertainty descriptive attributes
