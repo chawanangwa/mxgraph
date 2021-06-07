@@ -638,7 +638,7 @@ Format.prototype.refresh = function()
 
 			if(!value.hasAttribute("uncertaintyDB")) {
 
-				
+
 				uncertaintyData.system = "Flood monitoring systems (FMS) deploy in diverse but often harsh environments that expose them to various challenges making them vulnerable to uncertainty. Therefore, the software and hardware infrastructure of FMS needs to handle such environments and the associated uncertainties. Uncertainty can influence not only the hardware and software aspect of FMS, but also such aspects as the budget and project management and more.";
 				uncertaintyData.manifestation = "Network traffic loss";
 				uncertaintyData.environmentMonitor = "Operating environment monitoring properties: sensors, network-bandwidth, network connectivity, water-level meter and others.";
@@ -6506,5 +6506,304 @@ function help_text_tag_with_default(ui, labelOptionLabelValue, archPanel, textVa
 	labelOptionLabel.appendChild(archAttriTextNodeContainer);
 	archPanel.appendChild(labelOptionLabel);
 }
+
+
+var addUncertaintyDialog = function(editorUi, vertices) 
+{
+	var graph = editorUi.editor.graph;
+	var geo = (vertices.length == 1) ? graph.getCellGeometry(vertices[0]) : null;
+	var addUncertaintyDialog = document.createElement('div');
+	div = addUncertaintyDialog;
+	ui = editorUi;
+
+	//help_text_tag_with_default(editorUi, "Chawa", addUncertaintyDialog, "Chawa2");
+
+	var cells = graph.getSelectionCells();
+
+	var value = graph.getModel().getValue(cells[0]);
+
+	if (!mxUtils.isNode(value))
+	{
+		var doc = mxUtils.createXmlDocument();
+		var obj = doc.createElement('object');
+		obj.setAttribute('label', value || '');
+		value = obj;
+	}
+
+	//Create the uncertainty data object
+
+	uncertaintyPanel.innerHTML = '';
+	var uncertaintyData = {};
+	var uncertaintyDB = {};
+	var keyDB = "un2";
+
+	if(!value.hasAttribute("uncertaintyDB")) {
+
+
+		uncertaintyData.system = "Flood monitoring systems (FMS) deploy in diverse but often harsh environments that expose them to various challenges making them vulnerable to uncertainty. Therefore, the software and hardware infrastructure of FMS needs to handle such environments and the associated uncertainties. Uncertainty can influence not only the hardware and software aspect of FMS, but also such aspects as the budget and project management and more.";
+		uncertaintyData.manifestation = "Network traffic loss";
+		uncertaintyData.environmentMonitor = "Operating environment monitoring properties: sensors, network-bandwidth, network connectivity, water-level meter and others.";
+		uncertaintyData.nature = {options: ['Aleatory', 'Epistemic'], value: ""};
+		uncertaintyData.perspective = {options: ["Subjective", "Objective"], value: ""};
+		uncertaintyData.source = {options: ["External", "Internal"], value: ""};
+		uncertaintyData.viewpoint = {options: ["Logical", "Physical", "Process"], value: ""};
+		uncertaintyData.description = "Network connectivity may fail";				
+		uncertaintyData.evidence = "Ping reply";
+		uncertaintyData.SourceDescription = "Operational environment";
+		uncertaintyData.relatedUncertainties = {};
+		uncertaintyData.location = "Network component such as a router";
+		uncertaintyData.level = {options: ["Known Unknown", "Unknown unknown", "Statistical"], value: ""};
+		uncertaintyData.awareness = {options: ["Known Unknown", "Unknown unknown"], value: ""};
+		uncertaintyData.emergingTime = {options: ["Requirement", "Development", "Runtime"], value: ""};
+		uncertaintyData.lifetime = "Uncertainty from failure exists throughout the lifetime of the system";
+		uncertaintyData.pattern = {options: ["Periodic", "Persistence ", "Transient", "Sporadic"], value: ""};
+		uncertaintyData.measure = {options: ["Probability", "Persistence ", "Fuzziness", "Temporal logic", "Non-specificity"], value: ""};
+		uncertaintyData.related = "Communication infrastructure components";
+		uncertaintyData.operator = {options: ["Modal", "Temporal", "Ordinal"], value: "Modal"};
+		uncertaintyData.modal = {options: ["MAY", "SHALL"], value: ""};
+		uncertaintyData.ordinal = {options: ["AS CLOSE AS POSSIBLE TO '?'", "AS MANY POSSIBLE TO '?'", "AS FEW AS POSSIBLE TO '?'"], value: ""};
+		uncertaintyData.temporal = {options: ["EVENTUALLY","UNTIL","BEFORE","AFTER","AS EARLY AS POSSIBLE","AS LATE AS POSSIBLE","AS CLOSE AS POSSIBLE TO '?'"], value: ""};
+
+		//Save the uncertainty data into the cell - single first selected cell
+		//value.setAttribute("uncertaintyData", JSON.stringify(uncertaintyData));
+		uncertaintyDB[keyDB] = uncertaintyData;
+		value.setAttribute("uncertaintyDB", JSON.stringify(uncertaintyDB));
+		
+		//uncertaintybase = {1:uncertainty1, 2:uncertainty2, ..., n:uncertaintyn}
+		//value.settribute("uncertaintyDate", JSON.stringfy(uncertaintyData));
+		graph.getModel().setValue(cells[0], value);
+
+	}else if(mxUtils.isNode(value)){
+
+		//uncertaintyData = JSON.parse(value.getAttribute("uncertaintyData"));
+		uncertaintyDB = JSON.parse(value.getAttribute("uncertaintyDB"));
+
+		
+		DBkys = Object.keys(uncertaintyDB);
+		keyDB = DBkys[0];
+
+
+		uncertaintyData = uncertaintyDB[keyDB];
+		//console.log(Object.keys(uncertaintyDB));
+	}
+
+	//Uncertainty descriptive attributes
+
+	//Uncertainty description
+	var labelOptionLabel = "description";
+	help_text_tag_with_default(ui, labelOptionLabel, addUncertaintyDialog, uncertaintyData.description);
+
+	//Uncertainty nature
+	var labelOptionLabel = "nature";
+	help_select_tag_with_option(ui, labelOptionLabel, addUncertaintyDialog, uncertaintyData.nature.options, uncertaintyData.nature.value);
+
+	//Operators
+	labelOptionLabel = "operator";
+	help_select_tag_with_option(ui, labelOptionLabel, addUncertaintyDialog, uncertaintyData.operator.options, uncertaintyData.operator.value, true, "operator", "suboperator");
+
+	labelOptionLabel = uncertaintyData.operator.value.toLowerCase();//"temporal";
+	help_select_tag_with_option(ui, labelOptionLabel, addUncertaintyDialog, uncertaintyData[labelOptionLabel].options, uncertaintyData[labelOptionLabel].value, false, "suboperator");
+
+	//Perspective
+	labelOptionLabel = "perspective";
+	help_select_tag_with_option(ui, labelOptionLabel, addUncertaintyDialog, uncertaintyData.perspective.options, uncertaintyData.perspective.value);
+
+	//Awareness
+	labelOptionLabel = "awareness";
+	help_select_tag_with_option(ui, labelOptionLabel, addUncertaintyDialog, uncertaintyData.awareness.options, uncertaintyData.awareness.value);
+
+
+	//Level
+	labelOptionLabel = "level";
+	help_select_tag_with_option(ui, labelOptionLabel, addUncertaintyDialog, uncertaintyData.level.options, uncertaintyData.level.value);
+
+
+	// Uncertainty source attributes
+
+	//Source
+	labelOptionLabel = "source";
+	help_select_tag_with_option(ui, labelOptionLabel, addUncertaintyDialog, uncertaintyData.source.options, uncertaintyData.source.value);
+	
+	//Uncertainty description
+	var labelOptionLabel = "SourceDescription";
+	help_text_tag_with_default(ui, labelOptionLabel, addUncertaintyDialog, uncertaintyData.SourceDescription);		
+
+	//Sub source
+	//var labelOptionLabel = "Sub-source";
+	//var system_description = "Interference with the network routers from the environment";
+	//help_text_tag_with_default(ui, labelOptionLabel, uncertaintyPanel, system_description);
+
+	//Uncertainty system attributes
+
+	//System
+	var labelOptionLabel = "system";
+	help_text_tag_with_default(ui, labelOptionLabel, addUncertaintyDialog, uncertaintyData.system);
+	//Sub-system
+	//var labelOptionLabel = "Sub-system";
+	//var system_description = "Network, sensors, data storage, monitors and others";
+	//help_text_tag_with_default(ui, labelOptionLabel, uncertaintyPanel, system_description);
+
+
+	//viewpoint
+	labelOptionLabel = "viewpoint";
+	help_select_tag_with_option(ui, labelOptionLabel, addUncertaintyDialog, uncertaintyData.viewpoint.options, uncertaintyData.viewpoint.value);
+	
+	//Deminsion [location, level, emerging time, life-time, pattern, measure]
+	var labelOptionLabel = "location";
+	help_text_tag_with_default(ui, labelOptionLabel, addUncertaintyDialog, uncertaintyData.location);
+	
+	
+	//Uncertaity manifestation attributes
+	//Environment
+	var labelOptionLabel = "manifestation";
+	help_text_tag_with_default(ui, labelOptionLabel, addUncertaintyDialog, uncertaintyData.manifestation);
+
+	labelOptionLabel = "measure";
+	help_select_tag_with_option(ui, labelOptionLabel, addUncertaintyDialog, uncertaintyData.measure.options, uncertaintyData.measure.value);
+
+	//Environment monitoring properties
+	var labelOptionLabel = "environmentMonitor";
+	help_text_tag_with_default(ui, labelOptionLabel, addUncertaintyDialog, uncertaintyData.environmentMonitor);
+
+	//Evidence
+	var labelOptionLabel = "evidence";
+	help_text_tag_with_default(ui, labelOptionLabel, addUncertaintyDialog, uncertaintyData.evidence);		
+	
+	//Emerging time
+	labelOptionLabel = "emergingTime";
+	help_select_tag_with_option(ui, labelOptionLabel, addUncertaintyDialog, uncertaintyData.emergingTime.options, uncertaintyData.emergingTime.value);
+
+	//Life time
+	var labelOptionLabel = "lifetime";
+	help_text_tag_with_default(ui, labelOptionLabel, addUncertaintyDialog, uncertaintyData.lifetime);
+
+	labelOptionLabel = "pattern";
+	help_select_tag_with_option(ui, labelOptionLabel, addUncertaintyDialog, uncertaintyData.pattern.options, uncertaintyData.pattern.value);
+
+	//var labelOptionLabel = "Indicator";
+	//var system_description = "downtime";
+	//help_text_tag_with_default(ui, labelOptionLabel, uncertaintyPanel, system_description);
+
+	//Mapping
+	//Related uncertainties
+	var labelOptionLabel = "related";
+	help_text_tag_with_default(ui, labelOptionLabel, addUncertaintyDialog, uncertaintyData.related);
+
+	var cancelBtn = mxUtils.button(mxResources.get('cancel'), function()
+	{
+		editorUi.hideDialog();
+	});
+	
+	cancelBtn.className = 'geBtn';
+	
+	var applyBtn = mxUtils.button(mxResources.get('apply'), function()
+	{
+		editorUi.hideDialog();
+		
+		graph.getModel().beginUpdate();
+		try
+		{
+			for (var i = 0; i < vertices.length; i++)
+			{
+				var g = graph.getCellGeometry(vertices[i]);
+				
+				if (g != null)
+				{
+					g = g.clone();
+				
+					if (graph.isCellMovable(vertices[i]))
+					{
+						g.relative = relInput.checked;
+						
+						if (mxUtils.trim(xInput.value).length > 0)
+						{
+							g.x = Number(xInput.value);
+						}
+						
+						if (mxUtils.trim(yInput.value).length > 0)
+						{
+							g.y = Number(yInput.value);
+						}
+						
+						if (mxUtils.trim(dxInput.value).length > 0)
+						{
+							if (g.offset == null)
+							{
+								g.offset = new mxPoint();
+							}
+							
+							g.offset.x = Number(dxInput.value);
+						}
+						
+						if (mxUtils.trim(dyInput.value).length > 0)
+						{
+							if (g.offset == null)
+							{
+								g.offset = new mxPoint();
+							}
+							
+							g.offset.y = Number(dyInput.value);
+						}
+					}
+					
+					if (graph.isCellResizable(vertices[i]))
+					{
+						if (mxUtils.trim(wInput.value).length > 0)
+						{
+							g.width = Number(wInput.value);
+						}
+						
+						if (mxUtils.trim(hInput.value).length > 0)
+						{
+							g.height = Number(hInput.value);
+						}
+					}
+					
+					graph.getModel().setGeometry(vertices[i], g);
+				}
+				
+				if (mxUtils.trim(rotInput.value).length > 0)
+				{
+					graph.setCellStyles(mxConstants.STYLE_ROTATION, Number(rotInput.value), [vertices[i]]);
+				}
+			}
+		}
+		finally
+		{
+			graph.getModel().endUpdate();
+		}
+	});
+	
+	applyBtn.className = 'geBtn gePrimaryBtn';
+	
+	mxEvent.addListener(div, 'keypress', function(e)
+	{
+		if (e.keyCode == 13)
+		{
+			applyBtn.click();
+		}
+	});
+	
+	var buttons = document.createElement('div');
+	buttons.style.marginTop = '20px';
+	buttons.style.textAlign = 'right';
+
+	if (editorUi.editor.cancelFirst)
+	{
+		buttons.appendChild(cancelBtn);
+		buttons.appendChild(applyBtn);
+	}
+	else
+	{
+		buttons.appendChild(applyBtn);
+		buttons.appendChild(cancelBtn);
+	}
+
+	div.appendChild(buttons);
+
+
+
+	this.container = div;
+};
 
 

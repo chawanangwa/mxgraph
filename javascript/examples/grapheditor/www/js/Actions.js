@@ -1283,9 +1283,29 @@ Actions.prototype.init = function()
 			
 		}
 
-
-
 	}, null, null, Editor.ctrlKey + '+Shift+D');
+
+	this.addAction('addUncertainty', function()
+	{
+		var cells = graph.getSelectionCells();
+		var vertices = [];
+		
+		for (var i = 0; i < cells.length; i++)
+		{
+			if (graph.getModel().isVertex(cells[i]))
+			{
+				vertices.push(cells[i]);
+			}
+		}
+		
+		if (vertices.length > 0)
+		{
+			var dlg = new addUncertaintyDialog(ui, vertices);
+			ui.showDialog(dlg.container, 280, 840, true, true);
+			//dlg.init();
+		}
+	}, null, null, Editor.ctrlKey + '+Shift+U');
+
 	this.addAction('setAsDefaultStyle', function()
 	{
 		if (graph.isEnabled() && !graph.isSelectionEmpty())
