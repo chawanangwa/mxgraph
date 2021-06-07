@@ -638,26 +638,28 @@ Format.prototype.refresh = function()
 
 			if(!value.hasAttribute("uncertaintyDB")) {
 
+				uncertaintyData.id = new Date().valueOf();
+				keyDB = uncertaintyData.id;
 
-				uncertaintyData.system = "Flood monitoring systems (FMS) deploy in diverse but often harsh environments that expose them to various challenges making them vulnerable to uncertainty. Therefore, the software and hardware infrastructure of FMS needs to handle such environments and the associated uncertainties. Uncertainty can influence not only the hardware and software aspect of FMS, but also such aspects as the budget and project management and more.";
-				uncertaintyData.manifestation = "Network traffic loss";
-				uncertaintyData.environmentMonitor = "Operating environment monitoring properties: sensors, network-bandwidth, network connectivity, water-level meter and others.";
+				uncertaintyData.system = "System name";
+				uncertaintyData.manifestation = "";
+				uncertaintyData.environmentMonitor = "";
 				uncertaintyData.nature = {options: ['Aleatory', 'Epistemic'], value: ""};
 				uncertaintyData.perspective = {options: ["Subjective", "Objective"], value: ""};
 				uncertaintyData.source = {options: ["External", "Internal"], value: ""};
 				uncertaintyData.viewpoint = {options: ["Logical", "Physical", "Process"], value: ""};
-				uncertaintyData.description = "Network connectivity may fail";				
-				uncertaintyData.evidence = "Ping reply";
-				uncertaintyData.SourceDescription = "Operational environment";
+				uncertaintyData.description = "Description";				
+				uncertaintyData.evidence = "Evidence";
+				uncertaintyData.SourceDescription = "";
 				uncertaintyData.relatedUncertainties = {};
-				uncertaintyData.location = "Network component such as a router";
+				uncertaintyData.location = "";
 				uncertaintyData.level = {options: ["Known Unknown", "Unknown unknown", "Statistical"], value: ""};
 				uncertaintyData.awareness = {options: ["Known Unknown", "Unknown unknown"], value: ""};
 				uncertaintyData.emergingTime = {options: ["Requirement", "Development", "Runtime"], value: ""};
 				uncertaintyData.lifetime = "Uncertainty from failure exists throughout the lifetime of the system";
 				uncertaintyData.pattern = {options: ["Periodic", "Persistence ", "Transient", "Sporadic"], value: ""};
 				uncertaintyData.measure = {options: ["Probability", "Persistence ", "Fuzziness", "Temporal logic", "Non-specificity"], value: ""};
-				uncertaintyData.related = "Communication infrastructure components";
+				uncertaintyData.related = "";
 				uncertaintyData.operator = {options: ["Modal", "Temporal", "Ordinal"], value: "Modal"};
 				uncertaintyData.modal = {options: ["MAY", "SHALL"], value: ""};
 				uncertaintyData.ordinal = {options: ["AS CLOSE AS POSSIBLE TO '?'", "AS MANY POSSIBLE TO '?'", "AS FEW AS POSSIBLE TO '?'"], value: ""};
@@ -690,42 +692,42 @@ Format.prototype.refresh = function()
 
 			//Uncertainty description
 			var labelOptionLabel = "description";
-			help_text_tag_with_default(ui, labelOptionLabel, uncertaintyPanel, uncertaintyData.description);
+			help_text_tag_with_default(ui, labelOptionLabel, uncertaintyPanel, uncertaintyData.description, uncertaintyData.id);
 
 			//Uncertainty nature
 			var labelOptionLabel = "nature";
-			help_select_tag_with_option(ui, labelOptionLabel, uncertaintyPanel, uncertaintyData.nature.options, uncertaintyData.nature.value);
+			help_select_tag_with_option(uncertaintyData.id, ui, labelOptionLabel, uncertaintyPanel, uncertaintyData.nature.options, uncertaintyData.nature.value);
 
 			//Operators
 			labelOptionLabel = "operator";
-			help_select_tag_with_option(ui, labelOptionLabel, uncertaintyPanel, uncertaintyData.operator.options, uncertaintyData.operator.value, true, "operator", "suboperator");
+			help_select_tag_with_option(uncertaintyData.id, ui, labelOptionLabel, uncertaintyPanel, uncertaintyData.operator.options, uncertaintyData.operator.value, true, "operator", "suboperator");
 
 			labelOptionLabel = uncertaintyData.operator.value.toLowerCase();//"temporal";
-			help_select_tag_with_option(ui, labelOptionLabel, uncertaintyPanel, uncertaintyData[labelOptionLabel].options, uncertaintyData[labelOptionLabel].value, false, "suboperator");
+			help_select_tag_with_option(uncertaintyData.id, ui, labelOptionLabel, uncertaintyPanel, uncertaintyData[labelOptionLabel].options, uncertaintyData[labelOptionLabel].value, false, "suboperator");
 
 			//Perspective
 			labelOptionLabel = "perspective";
-			help_select_tag_with_option(ui, labelOptionLabel, uncertaintyPanel, uncertaintyData.perspective.options, uncertaintyData.perspective.value);
+			help_select_tag_with_option(uncertaintyData.id, ui, labelOptionLabel, uncertaintyPanel, uncertaintyData.perspective.options, uncertaintyData.perspective.value);
 
 			//Awareness
 			labelOptionLabel = "awareness";
-			help_select_tag_with_option(ui, labelOptionLabel, uncertaintyPanel, uncertaintyData.awareness.options, uncertaintyData.awareness.value);
+			help_select_tag_with_option(uncertaintyData.id, ui, labelOptionLabel, uncertaintyPanel, uncertaintyData.awareness.options, uncertaintyData.awareness.value);
 
 
 			//Level
 			labelOptionLabel = "level";
-			help_select_tag_with_option(ui, labelOptionLabel, uncertaintyPanel, uncertaintyData.level.options, uncertaintyData.level.value);
+			help_select_tag_with_option(uncertaintyData.id, ui, labelOptionLabel, uncertaintyPanel, uncertaintyData.level.options, uncertaintyData.level.value);
 
 
 			// Uncertainty source attributes
 
 			//Source
 			labelOptionLabel = "source";
-			help_select_tag_with_option(ui, labelOptionLabel, uncertaintyPanel, uncertaintyData.source.options, uncertaintyData.source.value);
+			help_select_tag_with_option(uncertaintyData.id, ui, labelOptionLabel, uncertaintyPanel, uncertaintyData.source.options, uncertaintyData.source.value);
 			
 			//Uncertainty description
 			var labelOptionLabel = "SourceDescription";
-			help_text_tag_with_default(ui, labelOptionLabel, uncertaintyPanel, uncertaintyData.SourceDescription);		
+			help_text_tag_with_default(ui, labelOptionLabel, uncertaintyPanel, uncertaintyData.SourceDescription, uncertaintyData.id);		
 
 			//Sub source
 			//var labelOptionLabel = "Sub-source";
@@ -736,7 +738,7 @@ Format.prototype.refresh = function()
 
 			//System
 			var labelOptionLabel = "system";
-			help_text_tag_with_default(ui, labelOptionLabel, uncertaintyPanel, uncertaintyData.system);
+			help_text_tag_with_default(ui, labelOptionLabel, uncertaintyPanel, uncertaintyData.system, uncertaintyData.id);
 			//Sub-system
 			//var labelOptionLabel = "Sub-system";
 			//var system_description = "Network, sensors, data storage, monitors and others";
@@ -745,39 +747,39 @@ Format.prototype.refresh = function()
 
 			//viewpoint
 			labelOptionLabel = "viewpoint";
-			help_select_tag_with_option(ui, labelOptionLabel, uncertaintyPanel, uncertaintyData.viewpoint.options, uncertaintyData.viewpoint.value);
+			help_select_tag_with_option(uncertaintyData.id, ui, labelOptionLabel, uncertaintyPanel, uncertaintyData.viewpoint.options, uncertaintyData.viewpoint.value);
 			
 			//Deminsion [location, level, emerging time, life-time, pattern, measure]
 			var labelOptionLabel = "location";
-			help_text_tag_with_default(ui, labelOptionLabel, uncertaintyPanel, uncertaintyData.location);
+			help_text_tag_with_default(ui, labelOptionLabel, uncertaintyPanel, uncertaintyData.location, uncertaintyData.id);
 			
 			
 			//Uncertaity manifestation attributes
 			//Environment
 			var labelOptionLabel = "manifestation";
-			help_text_tag_with_default(ui, labelOptionLabel, uncertaintyPanel, uncertaintyData.manifestation);
+			help_text_tag_with_default(ui, labelOptionLabel, uncertaintyPanel, uncertaintyData.manifestation, uncertaintyData.id);
 
 			labelOptionLabel = "measure";
-			help_select_tag_with_option(ui, labelOptionLabel, uncertaintyPanel, uncertaintyData.measure.options, uncertaintyData.measure.value);
+			help_select_tag_with_option(uncertaintyData.id, ui, labelOptionLabel, uncertaintyPanel, uncertaintyData.measure.options, uncertaintyData.measure.value);
 
 			//Environment monitoring properties
 			var labelOptionLabel = "environmentMonitor";
-			help_text_tag_with_default(ui, labelOptionLabel, uncertaintyPanel, uncertaintyData.environmentMonitor);
+			help_text_tag_with_default(ui, labelOptionLabel, uncertaintyPanel, uncertaintyData.environmentMonitor, uncertaintyData.id);
 
 			//Evidence
 			var labelOptionLabel = "evidence";
-			help_text_tag_with_default(ui, labelOptionLabel, uncertaintyPanel, uncertaintyData.evidence);		
+			help_text_tag_with_default(ui, labelOptionLabel, uncertaintyPanel, uncertaintyData.evidence, uncertaintyData.id);		
 			
 			//Emerging time
 			labelOptionLabel = "emergingTime";
-			help_select_tag_with_option(ui, labelOptionLabel, uncertaintyPanel, uncertaintyData.emergingTime.options, uncertaintyData.emergingTime.value);
+			help_select_tag_with_option(uncertaintyData.id, ui, labelOptionLabel, uncertaintyPanel, uncertaintyData.emergingTime.options, uncertaintyData.emergingTime.value);
 
 			//Life time
 			var labelOptionLabel = "lifetime";
-			help_text_tag_with_default(ui, labelOptionLabel, uncertaintyPanel, uncertaintyData.lifetime);
+			help_text_tag_with_default(ui, labelOptionLabel, uncertaintyPanel, uncertaintyData.lifetime, uncertaintyData.id);
 
 			labelOptionLabel = "pattern";
-			help_select_tag_with_option(ui, labelOptionLabel, uncertaintyPanel, uncertaintyData.pattern.options, uncertaintyData.pattern.value);
+			help_select_tag_with_option(uncertaintyData.id, ui, labelOptionLabel, uncertaintyPanel, uncertaintyData.pattern.options, uncertaintyData.pattern.value);
 
 			//var labelOptionLabel = "Indicator";
 			//var system_description = "downtime";
@@ -786,7 +788,7 @@ Format.prototype.refresh = function()
 			//Mapping
 			//Related uncertainties
 			var labelOptionLabel = "related";
-			help_text_tag_with_default(ui, labelOptionLabel, uncertaintyPanel, uncertaintyData.related);
+			help_text_tag_with_default(ui, labelOptionLabel, uncertaintyPanel, uncertaintyData.related, uncertaintyData.id);
 		});
 
 		// Uncertainty - risk
@@ -6374,9 +6376,9 @@ OutcomeFormatPanel.prototype.init = function()
 	//this.addFont(this.container);
 };
 
-function help_select_tag_with_option(ui, labelOptionLabelValue, archPanel, dirs, SelectedValue, suboptions=false, thisID, targetID) {
+function help_select_tag_with_option(uncertaintyDataID, ui, labelOptionLabelValue, archPanel, dirs, SelectedValue, suboptions=false, thisID, targetID) {
 
-	console.log("help_select_tag_with_option");
+	console.log("help_select_tag_with_option" + uncertaintyDataID);
 
 	//Label container
 	var labelOptionLabel = document.createElement('div');
@@ -6439,17 +6441,17 @@ function help_select_tag_with_option(ui, labelOptionLabelValue, archPanel, dirs,
 	mxEvent.addListener(dirSelect, 'change', function()
 	{
 		if(suboptions){
-			ui.actions.get('changeArchSelectOption').funct(labelOptionLabelValue, dirSelect, true, targetID);
+			ui.actions.get('changeArchSelectOption').funct(uncertaintyDataID, labelOptionLabelValue, dirSelect, true, targetID);
 		}else{
-			ui.actions.get('changeArchSelectOption').funct(labelOptionLabelValue, dirSelect, false);
+			ui.actions.get('changeArchSelectOption').funct(uncertaintyDataID, labelOptionLabelValue, dirSelect, false);
 		}
 	});
 }
 
 
-function help_text_tag_with_default(ui, labelOptionLabelValue, archPanel, textValue) {
+function help_text_tag_with_default(ui, labelOptionLabelValue, archPanel, textValue, uncertaintyDataID) {
 
-	console.log("help_text_tag_with_default");
+	console.log("help_text_tag_with_default : " + uncertaintyDataID);
 
 	//Attribute container
 	var labelOptionLabel = document.createElement('div');
@@ -6492,12 +6494,12 @@ function help_text_tag_with_default(ui, labelOptionLabelValue, archPanel, textVa
 
 	mxEvent.addListener(archAttriTextNodeContainer, 'click', function()
 	{
-		ui.actions.get('editArch').funct(archAttriTextNode, labelOptionLabelValue, archAttriTextNodeContainer);
+		ui.actions.get('editArch').funct(archAttriTextNode, labelOptionLabelValue, archAttriTextNodeContainer, uncertaintyDataID);
 	});
 
 	mxEvent.addListener(archAttriTextNodeContainer, 'change', function()
 	{
-		console.log("Text Change in " + labelOptionLabelValue + " -- " + archAttriTextNodeContainer.innerHTML);
+		console.log("Text Change in " + labelOptionLabelValue + " -- " + archAttriTextNodeContainer.innerHTML + " data: " + uncertaintyDataID);
 		//ui.actions.get('editArch').funct(archAttriTextNode, labelOptionLabelValue, archAttriTextNodeContainer);
 	});
 
@@ -6534,31 +6536,34 @@ var addUncertaintyDialog = function(editorUi, vertices)
 
 	uncertaintyPanel.innerHTML = '';
 	var uncertaintyData = {};
-	var uncertaintyDB = {};
+	var uncertaintyDB  = JSON.parse(value.getAttribute("uncertaintyDB"));
 	var keyDB = "un2";
 
-	if(!value.hasAttribute("uncertaintyDB")) {
+//	if(!value.hasAttribute("uncertaintyDB")) {
 
 
-		uncertaintyData.system = "Flood monitoring systems (FMS) deploy in diverse but often harsh environments that expose them to various challenges making them vulnerable to uncertainty. Therefore, the software and hardware infrastructure of FMS needs to handle such environments and the associated uncertainties. Uncertainty can influence not only the hardware and software aspect of FMS, but also such aspects as the budget and project management and more.";
-		uncertaintyData.manifestation = "Network traffic loss";
-		uncertaintyData.environmentMonitor = "Operating environment monitoring properties: sensors, network-bandwidth, network connectivity, water-level meter and others.";
+		uncertaintyData.id = new Date().valueOf();
+		keyDB = uncertaintyData.id;
+
+		uncertaintyData.system = "System name";
+		uncertaintyData.manifestation = "";
+		uncertaintyData.environmentMonitor = "";
 		uncertaintyData.nature = {options: ['Aleatory', 'Epistemic'], value: ""};
 		uncertaintyData.perspective = {options: ["Subjective", "Objective"], value: ""};
 		uncertaintyData.source = {options: ["External", "Internal"], value: ""};
 		uncertaintyData.viewpoint = {options: ["Logical", "Physical", "Process"], value: ""};
-		uncertaintyData.description = "Network connectivity may fail";				
-		uncertaintyData.evidence = "Ping reply";
-		uncertaintyData.SourceDescription = "Operational environment";
+		uncertaintyData.description = "Description";				
+		uncertaintyData.evidence = "Evidence";
+		uncertaintyData.SourceDescription = "";
 		uncertaintyData.relatedUncertainties = {};
-		uncertaintyData.location = "Network component such as a router";
+		uncertaintyData.location = "";
 		uncertaintyData.level = {options: ["Known Unknown", "Unknown unknown", "Statistical"], value: ""};
 		uncertaintyData.awareness = {options: ["Known Unknown", "Unknown unknown"], value: ""};
 		uncertaintyData.emergingTime = {options: ["Requirement", "Development", "Runtime"], value: ""};
 		uncertaintyData.lifetime = "Uncertainty from failure exists throughout the lifetime of the system";
 		uncertaintyData.pattern = {options: ["Periodic", "Persistence ", "Transient", "Sporadic"], value: ""};
 		uncertaintyData.measure = {options: ["Probability", "Persistence ", "Fuzziness", "Temporal logic", "Non-specificity"], value: ""};
-		uncertaintyData.related = "Communication infrastructure components";
+		uncertaintyData.related = "";
 		uncertaintyData.operator = {options: ["Modal", "Temporal", "Ordinal"], value: "Modal"};
 		uncertaintyData.modal = {options: ["MAY", "SHALL"], value: ""};
 		uncertaintyData.ordinal = {options: ["AS CLOSE AS POSSIBLE TO '?'", "AS MANY POSSIBLE TO '?'", "AS FEW AS POSSIBLE TO '?'"], value: ""};
@@ -6573,6 +6578,7 @@ var addUncertaintyDialog = function(editorUi, vertices)
 		//value.settribute("uncertaintyDate", JSON.stringfy(uncertaintyData));
 		graph.getModel().setValue(cells[0], value);
 
+/*
 	}else if(mxUtils.isNode(value)){
 
 		//uncertaintyData = JSON.parse(value.getAttribute("uncertaintyData"));
@@ -6586,47 +6592,47 @@ var addUncertaintyDialog = function(editorUi, vertices)
 		uncertaintyData = uncertaintyDB[keyDB];
 		//console.log(Object.keys(uncertaintyDB));
 	}
-
+*/
 	//Uncertainty descriptive attributes
 
 	//Uncertainty description
 	var labelOptionLabel = "description";
-	help_text_tag_with_default(ui, labelOptionLabel, addUncertaintyDialog, uncertaintyData.description);
+	help_text_tag_with_default(ui, labelOptionLabel, addUncertaintyDialog, uncertaintyData.description, uncertaintyData.id);
 
 	//Uncertainty nature
 	var labelOptionLabel = "nature";
-	help_select_tag_with_option(ui, labelOptionLabel, addUncertaintyDialog, uncertaintyData.nature.options, uncertaintyData.nature.value);
+	help_select_tag_with_option(uncertaintyData.id, ui, labelOptionLabel, addUncertaintyDialog, uncertaintyData.nature.options, uncertaintyData.nature.value);
 
 	//Operators
 	labelOptionLabel = "operator";
-	help_select_tag_with_option(ui, labelOptionLabel, addUncertaintyDialog, uncertaintyData.operator.options, uncertaintyData.operator.value, true, "operator", "suboperator");
+	help_select_tag_with_option(uncertaintyData.id, ui, labelOptionLabel, addUncertaintyDialog, uncertaintyData.operator.options, uncertaintyData.operator.value, true, "operator", "suboperator");
 
 	labelOptionLabel = uncertaintyData.operator.value.toLowerCase();//"temporal";
-	help_select_tag_with_option(ui, labelOptionLabel, addUncertaintyDialog, uncertaintyData[labelOptionLabel].options, uncertaintyData[labelOptionLabel].value, false, "suboperator");
+	help_select_tag_with_option(uncertaintyData.id, ui, labelOptionLabel, addUncertaintyDialog, uncertaintyData[labelOptionLabel].options, uncertaintyData[labelOptionLabel].value, false, "suboperator");
 
 	//Perspective
 	labelOptionLabel = "perspective";
-	help_select_tag_with_option(ui, labelOptionLabel, addUncertaintyDialog, uncertaintyData.perspective.options, uncertaintyData.perspective.value);
+	help_select_tag_with_option(uncertaintyData.id, ui, labelOptionLabel, addUncertaintyDialog, uncertaintyData.perspective.options, uncertaintyData.perspective.value);
 
 	//Awareness
 	labelOptionLabel = "awareness";
-	help_select_tag_with_option(ui, labelOptionLabel, addUncertaintyDialog, uncertaintyData.awareness.options, uncertaintyData.awareness.value);
+	help_select_tag_with_option(uncertaintyData.id, ui, labelOptionLabel, addUncertaintyDialog, uncertaintyData.awareness.options, uncertaintyData.awareness.value);
 
 
 	//Level
 	labelOptionLabel = "level";
-	help_select_tag_with_option(ui, labelOptionLabel, addUncertaintyDialog, uncertaintyData.level.options, uncertaintyData.level.value);
+	help_select_tag_with_option(uncertaintyData.id, ui, labelOptionLabel, addUncertaintyDialog, uncertaintyData.level.options, uncertaintyData.level.value);
 
 
 	// Uncertainty source attributes
 
 	//Source
 	labelOptionLabel = "source";
-	help_select_tag_with_option(ui, labelOptionLabel, addUncertaintyDialog, uncertaintyData.source.options, uncertaintyData.source.value);
+	help_select_tag_with_option(uncertaintyData.id, ui, labelOptionLabel, addUncertaintyDialog, uncertaintyData.source.options, uncertaintyData.source.value);
 	
 	//Uncertainty description
 	var labelOptionLabel = "SourceDescription";
-	help_text_tag_with_default(ui, labelOptionLabel, addUncertaintyDialog, uncertaintyData.SourceDescription);		
+	help_text_tag_with_default(ui, labelOptionLabel, addUncertaintyDialog, uncertaintyData.SourceDescription, uncertaintyData.id);		
 
 	//Sub source
 	//var labelOptionLabel = "Sub-source";
@@ -6637,7 +6643,7 @@ var addUncertaintyDialog = function(editorUi, vertices)
 
 	//System
 	var labelOptionLabel = "system";
-	help_text_tag_with_default(ui, labelOptionLabel, addUncertaintyDialog, uncertaintyData.system);
+	help_text_tag_with_default(ui, labelOptionLabel, addUncertaintyDialog, uncertaintyData.system, uncertaintyData.id);
 	//Sub-system
 	//var labelOptionLabel = "Sub-system";
 	//var system_description = "Network, sensors, data storage, monitors and others";
@@ -6646,39 +6652,39 @@ var addUncertaintyDialog = function(editorUi, vertices)
 
 	//viewpoint
 	labelOptionLabel = "viewpoint";
-	help_select_tag_with_option(ui, labelOptionLabel, addUncertaintyDialog, uncertaintyData.viewpoint.options, uncertaintyData.viewpoint.value);
+	help_select_tag_with_option(uncertaintyData.id, ui, labelOptionLabel, addUncertaintyDialog, uncertaintyData.viewpoint.options, uncertaintyData.viewpoint.value);
 	
 	//Deminsion [location, level, emerging time, life-time, pattern, measure]
 	var labelOptionLabel = "location";
-	help_text_tag_with_default(ui, labelOptionLabel, addUncertaintyDialog, uncertaintyData.location);
+	help_text_tag_with_default(ui, labelOptionLabel, addUncertaintyDialog, uncertaintyData.location, uncertaintyData.id);
 	
 	
 	//Uncertaity manifestation attributes
 	//Environment
 	var labelOptionLabel = "manifestation";
-	help_text_tag_with_default(ui, labelOptionLabel, addUncertaintyDialog, uncertaintyData.manifestation);
+	help_text_tag_with_default(ui, labelOptionLabel, addUncertaintyDialog, uncertaintyData.manifestation, uncertaintyData.id);
 
 	labelOptionLabel = "measure";
-	help_select_tag_with_option(ui, labelOptionLabel, addUncertaintyDialog, uncertaintyData.measure.options, uncertaintyData.measure.value);
+	help_select_tag_with_option(uncertaintyData.id, ui, labelOptionLabel, addUncertaintyDialog, uncertaintyData.measure.options, uncertaintyData.measure.value);
 
 	//Environment monitoring properties
 	var labelOptionLabel = "environmentMonitor";
-	help_text_tag_with_default(ui, labelOptionLabel, addUncertaintyDialog, uncertaintyData.environmentMonitor);
+	help_text_tag_with_default(ui, labelOptionLabel, addUncertaintyDialog, uncertaintyData.environmentMonitor, uncertaintyData.id);
 
 	//Evidence
 	var labelOptionLabel = "evidence";
-	help_text_tag_with_default(ui, labelOptionLabel, addUncertaintyDialog, uncertaintyData.evidence);		
+	help_text_tag_with_default(ui, labelOptionLabel, addUncertaintyDialog, uncertaintyData.evidence, uncertaintyData.id);		
 	
 	//Emerging time
 	labelOptionLabel = "emergingTime";
-	help_select_tag_with_option(ui, labelOptionLabel, addUncertaintyDialog, uncertaintyData.emergingTime.options, uncertaintyData.emergingTime.value);
+	help_select_tag_with_option(uncertaintyData.id, ui, labelOptionLabel, addUncertaintyDialog, uncertaintyData.emergingTime.options, uncertaintyData.emergingTime.value);
 
 	//Life time
 	var labelOptionLabel = "lifetime";
-	help_text_tag_with_default(ui, labelOptionLabel, addUncertaintyDialog, uncertaintyData.lifetime);
+	help_text_tag_with_default(ui, labelOptionLabel, addUncertaintyDialog, uncertaintyData.lifetime, uncertaintyData.id);
 
 	labelOptionLabel = "pattern";
-	help_select_tag_with_option(ui, labelOptionLabel, addUncertaintyDialog, uncertaintyData.pattern.options, uncertaintyData.pattern.value);
+	help_select_tag_with_option(uncertaintyData.id, ui, labelOptionLabel, addUncertaintyDialog, uncertaintyData.pattern.options, uncertaintyData.pattern.value);
 
 	//var labelOptionLabel = "Indicator";
 	//var system_description = "downtime";
@@ -6687,7 +6693,7 @@ var addUncertaintyDialog = function(editorUi, vertices)
 	//Mapping
 	//Related uncertainties
 	var labelOptionLabel = "related";
-	help_text_tag_with_default(ui, labelOptionLabel, addUncertaintyDialog, uncertaintyData.related);
+	help_text_tag_with_default(ui, labelOptionLabel, addUncertaintyDialog, uncertaintyData.related, uncertaintyData.id);
 
 	var cancelBtn = mxUtils.button(mxResources.get('cancel'), function()
 	{
