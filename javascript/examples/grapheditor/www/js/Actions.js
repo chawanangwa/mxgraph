@@ -1131,7 +1131,7 @@ Actions.prototype.init = function()
 			dlg.init();
 		}
 	}), null, null, Editor.ctrlKey + '+E');
-	this.addAction('editArch', mxUtils.bind(this, function(textValue, archAttrilabel, archAttriContainer)
+	this.addAction('editArch', mxUtils.bind(this, function(textValue, archAttrilabel, archAttriContainer, uncertaintyDataID)
 	{
 		var cells = graph.getSelectionCells();
 		
@@ -1167,14 +1167,10 @@ Actions.prototype.init = function()
 						*/
 						uncertaintyDB = JSON.parse(value.getAttribute("uncertaintyDB"));
 
-						DBkys = Object.keys(uncertaintyDB);
-						keyDB = DBkys[0];
-
-
-						uncertaintyData = uncertaintyDB[keyDB]//JSON.parse(value.getAttribute("uncertaintyData"));
+						uncertaintyData = uncertaintyDB[uncertaintyDataID]//JSON.parse(value.getAttribute("uncertaintyData"));
 						uncertaintyData[archAttrilabel] = textValue.data;
 
-						uncertaintyDB[keyDB] = uncertaintyData //update DB record
+						uncertaintyDB[uncertaintyDataID] = uncertaintyData //update DB record
 
 						//value.setAttribute("uncertaintyData", JSON.stringify(uncertaintyData));	update uncertainty DB
 						value.setAttribute("uncertaintyDB", JSON.stringify(uncertaintyDB));		
@@ -1188,7 +1184,7 @@ Actions.prototype.init = function()
 			dlg.init();
 		}
 	}), null, null, Editor.ctrlKey + '+E');
-	this.addAction('changeArchSelectOption', function(labelOptionLabelValue, dirSelect, suboptions=false, targetID)
+	this.addAction('changeArchSelectOption', function(uncertaintyDataID, labelOptionLabelValue, dirSelect, suboptions=false, targetID)
 	{
 
 		console.log(suboptions + " =  suboptions = " + dirSelect.value);
@@ -1219,13 +1215,13 @@ Actions.prototype.init = function()
 
 				uncertaintyDB = JSON.parse(value.getAttribute("uncertaintyDB"));
 
-				DBkys = Object.keys(uncertaintyDB);
-				keyDB = DBkys[0];
 
-				uncertaintyData = uncertaintyDB[keyDB]//JSON.parse(value.getAttribute("uncertaintyData"));
+				console.log("Uncertainty ID: " + uncertaintyDataID);
+
+				uncertaintyData = uncertaintyDB[uncertaintyDataID]//JSON.parse(value.getAttribute("uncertaintyData"));
 				uncertaintyData[labelOptionLabelValue].value = dirSelect.value;
 
-				uncertaintyDB[keyDB] = uncertaintyData //update DB record
+				uncertaintyDB[uncertaintyDataID] = uncertaintyData //update DB record
 
 				//value.setAttribute("uncertaintyData", JSON.stringify(uncertaintyData));	update uncertainty DB
 				value.setAttribute("uncertaintyDB", JSON.stringify(uncertaintyDB));		
