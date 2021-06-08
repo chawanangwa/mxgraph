@@ -656,7 +656,7 @@ Format.prototype.refresh = function()
 				uncertaintyData.level = {options: ["Known Unknown", "Unknown unknown", "Statistical"], value: ""};
 				uncertaintyData.awareness = {options: ["Known Unknown", "Unknown unknown"], value: ""};
 				uncertaintyData.emergingTime = {options: ["Requirement", "Development", "Runtime"], value: ""};
-				uncertaintyData.lifetime = "Uncertainty from failure exists throughout the lifetime of the system";
+				uncertaintyData.lifetime = "";
 				uncertaintyData.pattern = {options: ["Periodic", "Persistence ", "Transient", "Sporadic"], value: ""};
 				uncertaintyData.measure = {options: ["Probability", "Persistence ", "Fuzziness", "Temporal logic", "Non-specificity"], value: ""};
 				uncertaintyData.related = "";
@@ -789,6 +789,8 @@ Format.prototype.refresh = function()
 			//Related uncertainties
 			var labelOptionLabel = "related";
 			help_text_tag_with_default(ui, labelOptionLabel, uncertaintyPanel, uncertaintyData.related, uncertaintyData.id);
+
+			document.getElementById("analyseUncertaintyButton").innerHTML = "Uncertainties: " + Object.keys(JSON.parse(value.getAttribute("uncertaintyDB"))).length;
 		});
 
 		// Uncertainty - risk
@@ -6560,7 +6562,7 @@ var addUncertaintyDialog = function(editorUi, vertices)
 		uncertaintyData.level = {options: ["Known Unknown", "Unknown unknown", "Statistical"], value: ""};
 		uncertaintyData.awareness = {options: ["Known Unknown", "Unknown unknown"], value: ""};
 		uncertaintyData.emergingTime = {options: ["Requirement", "Development", "Runtime"], value: ""};
-		uncertaintyData.lifetime = "Uncertainty from failure exists throughout the lifetime of the system";
+		uncertaintyData.lifetime = "";
 		uncertaintyData.pattern = {options: ["Periodic", "Persistence ", "Transient", "Sporadic"], value: ""};
 		uncertaintyData.measure = {options: ["Probability", "Persistence ", "Fuzziness", "Temporal logic", "Non-specificity"], value: ""};
 		uncertaintyData.related = "";
