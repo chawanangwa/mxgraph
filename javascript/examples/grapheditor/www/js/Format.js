@@ -6699,6 +6699,11 @@ var addUncertaintyDialog = function(editorUi, vertices)
 
 	var cancelBtn = mxUtils.button(mxResources.get('cancel'), function()
 	{
+		//Delete the recently added uncertainty element
+		delete uncertaintyDB[uncertaintyData.id];
+		value.setAttribute("uncertaintyDB", JSON.stringify(uncertaintyDB));
+		graph.getModel().setValue(cells[0], value);
+		 
 		editorUi.hideDialog();
 	});
 	
@@ -6707,79 +6712,6 @@ var addUncertaintyDialog = function(editorUi, vertices)
 	var applyBtn = mxUtils.button(mxResources.get('apply'), function()
 	{
 		editorUi.hideDialog();
-		
-		graph.getModel().beginUpdate();
-		try
-		{
-			for (var i = 0; i < vertices.length; i++)
-			{
-				var g = graph.getCellGeometry(vertices[i]);
-				
-				if (g != null)
-				{
-					g = g.clone();
-				
-					if (graph.isCellMovable(vertices[i]))
-					{
-						g.relative = relInput.checked;
-						
-						if (mxUtils.trim(xInput.value).length > 0)
-						{
-							g.x = Number(xInput.value);
-						}
-						
-						if (mxUtils.trim(yInput.value).length > 0)
-						{
-							g.y = Number(yInput.value);
-						}
-						
-						if (mxUtils.trim(dxInput.value).length > 0)
-						{
-							if (g.offset == null)
-							{
-								g.offset = new mxPoint();
-							}
-							
-							g.offset.x = Number(dxInput.value);
-						}
-						
-						if (mxUtils.trim(dyInput.value).length > 0)
-						{
-							if (g.offset == null)
-							{
-								g.offset = new mxPoint();
-							}
-							
-							g.offset.y = Number(dyInput.value);
-						}
-					}
-					
-					if (graph.isCellResizable(vertices[i]))
-					{
-						if (mxUtils.trim(wInput.value).length > 0)
-						{
-							g.width = Number(wInput.value);
-						}
-						
-						if (mxUtils.trim(hInput.value).length > 0)
-						{
-							g.height = Number(hInput.value);
-						}
-					}
-					
-					graph.getModel().setGeometry(vertices[i], g);
-				}
-				
-				if (mxUtils.trim(rotInput.value).length > 0)
-				{
-					graph.setCellStyles(mxConstants.STYLE_ROTATION, Number(rotInput.value), [vertices[i]]);
-				}
-			}
-		}
-		finally
-		{
-			graph.getModel().endUpdate();
-		}
 	});
 	
 	applyBtn.className = 'geBtn gePrimaryBtn';
